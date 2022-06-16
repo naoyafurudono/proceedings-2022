@@ -1,0 +1,2336 @@
+\documentclass[runningheads]{llncs}
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+
+
+
+
+
+
+
+
+
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+\usepackage{microtype}
+
+
+
+% url style
+\usepackage{url}
+\urlstyle{same}
+
+\begin{document}
+
+\title{Deep Embedding with Class}
+\author{Mart~Lubbers\orcidID{0000-0002-4015-4878}}
+\institute{%
+	Institute for Computing and Information Sciences,\\
+	Radboud University Nijmegen, Nijmegen, The Netherlands\\
+	\email{mart@cs.ru.nl}
+}
+
+\maketitle
+	
+\begin{abstract}
+	The two flavours of DSL embedding are shallow and deep embedding.
+	In functional languages, shallow embedding models the language constructs as functions in which the semantics are embedded.
+	Adding semantics is therefore cumbersome while adding constructs is a breeze.
+	Upgrading the functions to type classes lifts this limitation to a certain extent.
+
+	Deeply embedded languages represent their language constructs as data and the semantics are functions on it.
+	As a result, the language constructs are embedded in the semantics, hence adding new language constructs is laborious where adding semantics is trouble free.
+
+	This paper shows that by abstracting the semantics functions in deep embedding to type classes, it is possible to easily add language constructs as well.
+	So-called classy deep embedding results in DSLs that are extensible both in language constructs and in semantics while maintaining a concrete abstract syntax tree.
+	Additionally, little type-level trickery or complicated boilerplate code is required to achieve this.
+	\keywords{functional programming\and Haskell \and embedded domain-specific languages}
+\end{abstract}
+
+\section{Introduction}%
+\label{sec:intro}
+
+The two flavours of DSL embedding are deep and shallow embedding~\cite{boulton_experience_1992}.
+In functional programming languages, shallow embedding models language constructs as functions in the host language.
+As a result, adding new language constructs---extra functions---is easy.
+However, the semantics of the language is embedded in these functions, making it troublesome to add semantics since it requires updating all existing language constructs.
+
+On the other hand, deep embedding models language constructs as data in the host language.
+The semantics of the language are represented by functions over the data.
+Consequently, adding new semantics, i.e.\ novel functions, is straightforward.
+It can be stated that the language constructs are embedded in the functions that form a semantics.
+If one wants to add a language construct, all semantics functions must be revisited and revised to avoid ending up with partial functions.
+
+This juxtaposition has been known for many years~\cite{reynolds_user-defined_1978} and discussed by many others~\cite{krishnamurthi_synthesizing_1998} but most famously dubbed the \emph{expression problem} by Wadler~\cite{wadler_expression_1998}:
+
+\begin{quote}
+	The \emph{expression problem} is a new name for an old problem.
+	The goal is to define a data type by cases, where one can add new cases to the data type and new functions over the data type, without recompiling existing code, and while retaining static type safety (e.g., no casts).
+\end{quote}
+
+In shallow embedding, abstracting the functions to type classes disentangles the language constructs from the semantics, allowing extension both ways.
+This technique is dubbed tagless-final embedding~\cite{carette_finally_2009}, nonetheless it is no silver bullet.
+Some semantics that require an intensional analysis of the syntax tree, such as transformation and optimisations, are difficult to implement in shallow embedding due to the lack of an explicit data structure representing the abstract syntax tree.
+The semantics of the DSL have to be combined and must hold some kind of state or context, so that structural information is not lost~\cite{kiselyov_typed_2012}.
+
+\subsection{Research contribution}
+This paper shows how to apply the technique observed in tagless-final embedding to deep embedding.
+The presented basic technique, christened \emph{classy deep embedding}, does not require advanced type system extensions to be used.
+However, it is suitable for type system extensions such as generalised algebraic data types.
+While this paper is written as a literate
+Haskell~\cite{peyton_jones_haskell_2003} program using some minor extensions provided by GHC~\cite{ghc_team_ghc_2021}, the idea is applicable to other languages as well\footnotemark{}.
+\footnotetext{Lubbers, M. (2022): Literate Haskell/lhs2\TeX{} source code of the paper ``Deep Embedding
+with Class'': TFP 2022.\ Zenodo.\ \url{https://doi.org/10.5281/zenodo.6650880}.}
+
+\section{Deep embedding}%
+\label{sec:deep}
+
+%Pick a DSL, any DSL, pick the language of literal integers and addition.
+Consider the simple language of integer literals and addition.
+In deep embedding, terms in the language are represented by data in the host language.
+Hence, defining the constructs is as simple as creating the following algebraic data type\footnote{All data types and functions are subscripted to indicate the evolution.}.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{14E}{@{}l@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_0{}\<[14]%
+\>[14]{}\mathrel{=}{}\<[14E]%
+\>[17]{}Lit_0\;{}\<[24]%
+\>[24]{}\Conid{Int}{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}Add_0\;{}\<[24]%
+\>[24]{}Expr_0\;Expr_0{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Semantics are defined as functions on the \ensuremath{Expr_0} data type.
+For example, a function transforming the term to an integer---an evaluator---is implemented as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{23E}{@{}l@{}}%
+\column{26}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}eval_0\mathbin{::}Expr_0\to \Conid{Int}{}\<[E]%
+\\
+\>[B]{}eval_0\;(Lit_0\;\Varid{e}){}\<[23]%
+\>[23]{}\mathrel{=}{}\<[23E]%
+\>[26]{}\Varid{e}{}\<[E]%
+\\
+\>[B]{}eval_0\;(Add_0\;e_1\;e_2){}\<[23]%
+\>[23]{}\mathrel{=}{}\<[23E]%
+\>[26]{}eval_0\;e_1\mathbin{+}eval_0\;e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Adding semantics---e.g.\ a printer---just means adding another function while the existing functions remain untouched.
+I.e.\ the key property of deep embedding.
+The following function, transforming the \ensuremath{Expr_0} data type to a string, defines a simple printer for our language.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{25E}{@{}l@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}print_0\mathbin{::}Expr_0\to \Conid{String}{}\<[E]%
+\\
+\>[B]{}print_0\;(Lit_0\;{}\<[17]%
+\>[17]{}\Varid{v}){}\<[25]%
+\>[25]{}\mathrel{=}{}\<[25E]%
+\>[28]{}\Varid{show}\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}print_0\;(Add_0\;{}\<[17]%
+\>[17]{}e_1\;e_2){}\<[25]%
+\>[25]{}\mathrel{=}{}\<[25E]%
+\>[28]{}\text{\ttfamily \char34 (\char34}\plus print_0\;e_1\plus \text{\ttfamily \char34 -\char34}\plus print_0\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+While the language is concise and elegant, it is not very expressive.
+Traditionally, extending the language is achieved by adding a case to the \ensuremath{Expr_0} data type.
+So, adding subtraction to the language results in the following revised data type.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{14E}{@{}l@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_0{}\<[14]%
+\>[14]{}\mathrel{=}{}\<[14E]%
+\>[17]{}Lit_0\;{}\<[24]%
+\>[24]{}\Conid{Int}{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}Add_0\;{}\<[24]%
+\>[24]{}Expr_0\;Expr_0{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}Sub_0\;{}\<[24]%
+\>[24]{}Expr_0\;Expr_0{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Extending the DSL with language constructs exposes the Achilles' heel of deep embedding.
+Adding a case to the data type means that all semantics functions have become partial and need to be updated to be able to handle this new case.
+This does not seem like an insurmountable problem, but it does pose a problem if either the functions or the data type itself are written by others or are contained in a closed library.
+
+\section{Shallow embedding}%
+\label{sec:shallow}
+
+Conversely, let us see how this would be done in shallow embedding.
+First, the data type is represented by functions in the host language with embedded semantics.
+Therefore, the evaluators for literals and addition both become a function in the host language as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;Sem_s\mathrel{=}\Conid{Int}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}lit_s\mathbin{::}\Conid{Int}\to Sem_s{}\<[E]%
+\\
+\>[B]{}lit_s\;\Varid{i}\mathrel{=}\Varid{i}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}add_s\mathbin{::}Sem_s\to Sem_s\to Sem_s{}\<[E]%
+\\
+\>[B]{}add_s\;e_1\;e_2\mathrel{=}e_1\mathbin{+}e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Adding constructions to the language is done by adding functions.
+Hence, the following function adds subtraction to our language.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}sub_s\mathbin{::}Sem_s\to Sem_s\to Sem_s{}\<[E]%
+\\
+\>[B]{}sub_s\;e_1\;e_2\mathrel{=}e_1\mathbin{-}e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Adding semantics on the other hand---e.g.\ a printer---is not that simple because the semantics are part of the functions representing the language constructs.
+One way to add semantics is to change all functions to execute both semantics at the same time.
+In our case this means changing the type of \ensuremath{Sem_s} to be \ensuremath{(\Conid{Int},\Conid{String})} so that all functions operate on a tuple containing the result of the evaluator and the printed representation at the same time. %chktex 36
+Alternatively, a single semantics can be defined that represents a fold over the language constructs~\cite{gibbons_folding_2014}, delaying the selection of semantics to the moment the fold is applied.
+
+\subsection{Tagless-final embedding}\label{sec:tagless-final}
+Tagless-final embedding overcomes the limitations of standard shallow embedding.
+To upgrade to this embedding technique, the language constructs are changed from functions to type classes.
+For our language this results in the following type class definition.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{12E}{@{}l@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Expr_t\;\Varid{s}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}lit_t{}\<[12]%
+\>[12]{}\mathbin{::}{}\<[12E]%
+\>[16]{}\Conid{Int}\to \Varid{s}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}add_t{}\<[12]%
+\>[12]{}\mathbin{::}{}\<[12E]%
+\>[16]{}\Varid{s}\to \Varid{s}\to \Varid{s}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Semantics become data types\footnotemark{} implementing these type classes, resulting in the following instance for the evaluator.
+\footnotetext{%
+	In this case \ensuremath{\mathbf{newtype}}s are used instead of regular \ensuremath{\mathbf{data}} declarations.
+	A \ensuremath{\mathbf{newtype}} is a special data type with a single constructor containing a single value only to which it is isomorphic.
+	It allows the programmer to define separate class instances that the instances of the isomorphic type without any overhead.
+	During compilation the constructor is completely removed~\cite[Sec.~4.2.3]{peyton_jones_haskell_2003}.
+}
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{31}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{31E}{@{}l@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;Eval_t\mathrel{=}E_t\;\Conid{Int}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Expr_t\;Eval_t\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}lit_t\;{}\<[12]%
+\>[12]{}\Varid{v}{}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}E_t\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}add_t\;{}\<[12]%
+\>[12]{}(E_t\;e_1)\;(E_t\;e_2){}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}E_t\;(e_1\mathbin{+}e_2){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Adding constructs---e.g.\ subtraction---just results in an extra type class and corresponding instances.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Sub_t\;\Varid{s}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}sub_t\mathbin{::}\Varid{s}\to \Varid{s}\to \Varid{s}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Sub_t\;Eval_t\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}sub_t\;(E_t\;e_1)\;(E_t\;e_2)\mathrel{=}E_t\;(e_1\mathbin{-}e_2){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Finally, adding semantics such as a printer over the language is achieved by providing a data type representing the semantics accompanied by instances for the language constructs.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{31}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{31E}{@{}l@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;Printer_t\mathrel{=}P_t\;\Conid{String}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Expr_t\;Printer_t\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}lit_t\;{}\<[12]%
+\>[12]{}\Varid{i}{}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}P_t\;(\Varid{show}\;\Varid{i}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}add_t\;{}\<[12]%
+\>[12]{}(P_t\;e_1)\;(P_t\;e_2){}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}P_t\;(\text{\ttfamily \char34 (\char34}\plus e_1\plus \text{\ttfamily \char34 +\char34}\plus e_2\plus \text{\ttfamily \char34 )\char34}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Sub_t\;Printer_t\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}sub_t\;{}\<[12]%
+\>[12]{}(P_t\;e_1)\;(P_t\;e_2){}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}P_t\;(\text{\ttfamily \char34 (\char34}\plus e_1\plus \text{\ttfamily \char34 -\char34}\plus e_2\plus \text{\ttfamily \char34 )\char34}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Lifting the backends}%
+\label{sec:lift}
+
+Let us rethink the deeply embedded DSL design.
+Remember that in shallow embedding, the semantics are embedded in the language construct functions.
+Obtaining extensibility both in constructs and semantics was accomplished by abstracting the semantics functions to type classes, making the constructs overloaded in the semantics.
+In deep embedding, the constructs are embedded in the semantics functions instead.
+So, let us apply the same technique, i.e.\ make the semantics overloaded in the language constructs by abstracting the semantics functions to type classes.
+The same effect may be achieved when using similar techniques such as explicit dictionary passing or ML style modules.
+In our language this results in the following type class.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{14E}{@{}l@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Eval_1\;\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_1\mathbin{::}\Varid{v}\to \Conid{Int}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;Expr_1{}\<[14]%
+\>[14]{}\mathrel{=}{}\<[14E]%
+\>[17]{}Lit_1\;{}\<[24]%
+\>[24]{}\Conid{Int}{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}Add_1\;{}\<[24]%
+\>[24]{}Expr_1\;Expr_1{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Implementing the semantics type class instances for the \ensuremath{Expr_1} data type is an elementary exercise.
+By a copy-paste and some modifications, we come to the following implementation.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;Eval_1\;Expr_1\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_1\;(Lit_1\;{}\<[20]%
+\>[20]{}\Varid{v}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_1\;(Add_1\;{}\<[20]%
+\>[20]{}e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_1\;e_1\mathbin{+}eval_1\;e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Subtraction can now be defined in a separate data type, leaving the original data type intact.
+Instances for the additional semantics can now be implemented separately as instances of the type classes.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Sub_1\mathrel{=}Sub_1\;Expr_1\;Expr_1{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Eval_1\;Sub_1\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_1\;(Sub_1\;e_1\;e_2)\mathrel{=}eval_1\;e_1\mathbin{-}eval_1\;e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Existential data types}%
+\label{sec:existential}
+
+The astute reader might have noticed that we have dissociated ourselves from the original data type.
+It is only possible to create an expression with a subtraction on the top level.
+The recursive knot is left untied and as a result, \ensuremath{Sub_1} can never be reached from an \ensuremath{Expr_1}.
+
+Luckily, we can reconnect them by adding a special constructor to the \ensuremath{Expr_1} data type for housing extensions.
+It contains an existentially quantified~\cite{mitchell_abstract_1988} type with type class constraints~\cite{laufer_combining_1994,laufer_type_1996} for all semantics type classes~\cite[Chp.~6.4.6]{ghc_team_ghc_2021} to allow it to house not just subtraction but any future extension.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{14E}{@{}l@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{47}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_2{}\<[14]%
+\>[14]{}\mathrel{=}{}\<[14E]%
+\>[40]{}Lit_2\;{}\<[47]%
+\>[47]{}\Conid{Int}{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[40]{}Add_2\;{}\<[47]%
+\>[47]{}Expr_2\;Expr_2{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}{\bf forall\ }\Varid{x}\hsforall \hsdot{\circ }{.}Eval_2\;\Varid{x}\Rightarrow {}\<[40]%
+\>[40]{}Ext_2\;{}\<[47]%
+\>[47]{}\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+The implementation of the extension case in the semantics type classes is in most cases just a matter of calling the function for the argument as can be seen in the semantics instances shown below.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;Eval_2\;Expr_2\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_2\;(Lit_2\;{}\<[20]%
+\>[20]{}\Varid{v}){}\<[28]%
+\>[28]{}\mathrel{=}\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_2\;(Add_2\;{}\<[20]%
+\>[20]{}e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}eval_2\;e_1\mathbin{+}eval_2\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_2\;(Ext_2\;{}\<[20]%
+\>[20]{}\Varid{x}){}\<[28]%
+\>[28]{}\mathrel{=}eval_2\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+Adding language construct extensions in different data types does mean that an extra \ensuremath{Ext_2} tag is introduced when using the extension.
+This burden can be relieved by creating a smart constructor for it that automatically wraps the extension with the \ensuremath{Ext_2} constructor so that it is of the type of the main data type.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}sub_2\mathbin{::}Expr_2\to Expr_2\to Expr_2{}\<[E]%
+\\
+\>[B]{}sub_2\;e_1\;e_2\mathrel{=}Ext_2\;(Sub_2\;e_1\;e_2){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+In our example this means that the programmer can write\footnotemark{}:
+\footnotetext{%
+	Backticks are used to use functions or constructors in an infix fashion~\cite[Sec.~4.3.3]{peyton_jones_haskell_2003}.
+}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{5E}{@{}l@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}e_2{}\<[5]%
+\>[5]{}\mathbin{::}{}\<[5E]%
+\>[9]{}Expr_2{}\<[E]%
+\\
+\>[B]{}e_2{}\<[5]%
+\>[5]{}\mathrel{=}{}\<[5E]%
+\>[9]{}Lit_2\;\mathrm{42}\mathbin{`sub_2`}Lit_2\;\mathrm{1}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+instead of having to write
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{6}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{6E}{@{}l@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}e_2^\prime{}\<[6]%
+\>[6]{}\mathbin{::}{}\<[6E]%
+\>[10]{}Expr_2{}\<[E]%
+\\
+\>[B]{}e_2^\prime{}\<[6]%
+\>[6]{}\mathrel{=}{}\<[6E]%
+\>[10]{}Ext_2\;(Lit_2\;\mathrm{42}\mathbin{`Sub_2`}Lit_2\;\mathrm{1}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Unbraiding the semantics from the data}
+This approach does reveal a minor problem.
+Namely, that all semantics type classes are braided into our datatypes via the \ensuremath{Ext_2} constructor.
+Say if we add the printer again, the \ensuremath{Ext_2} constructor has to be modified to contain the printer type class constraint as well\footnote{Resulting in the following constructor: \ensuremath{{\bf forall\ }\Varid{x}\hsforall \hsdot{\circ }{.}(Eval_2\;\Varid{x},Print_2\;\Varid{x})\Rightarrow Ext_2\;\Varid{x}}.}. %chktex 36
+Thus, if we add semantics, the main data type's type class constraints in the \ensuremath{Ext_2} constructor need to be updated.
+To avoid this, the type classes can be bundled in a type class alias or type class collection as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{14E}{@{}l@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{45}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{52}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;(Eval_2\;\Varid{x},Print_2\;\Varid{x})\Rightarrow Semantics_2\;\Varid{x}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;Expr_2{}\<[14]%
+\>[14]{}\mathrel{=}{}\<[14E]%
+\>[45]{}Lit_2\;{}\<[52]%
+\>[52]{}\Conid{Int}{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[45]{}Add_2\;{}\<[52]%
+\>[52]{}Expr_2\;Expr_2{}\<[E]%
+\\
+\>[14]{}\mid {}\<[14E]%
+\>[17]{}{\bf forall\ }\Varid{x}\hsforall \hsdot{\circ }{.}Semantics_2\;\Varid{x}\Rightarrow {}\<[45]%
+\>[45]{}Ext_2\;{}\<[52]%
+\>[52]{}\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The class alias removes the need for the programmer to visit the main data type when adding additional semantics.
+Unfortunately, the compiler does need to visit the main data type again.
+Some may argue that adding semantics happens less frequently than adding language constructs but in reality it means that we have to concede that the language is not as easily extensible in semantics as in language constructs.
+More exotic type system extensions such as constraint kinds~\cite{bolingbroke_constraint_2011,yorgey_giving_2012} can untangle the semantics from the data types by making the data types parametrised by the particular semantics.
+However, by adding some boilerplate, even without this extension, the language constructs can be parametrised by the semantics by putting the semantics functions in a data type.
+First the data types for the language constructs are parametrised by the type variable \ensuremath{\Varid{d}} as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{19E}{@{}l@{}}%
+\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{33}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_3\;\Varid{d}{}\<[19]%
+\>[19]{}\mathrel{=}{}\<[19E]%
+\>[33]{}Lit_3\;{}\<[40]%
+\>[40]{}\Conid{Int}{}\<[E]%
+\\
+\>[19]{}\mid {}\<[19E]%
+\>[33]{}Add_3\;{}\<[40]%
+\>[40]{}(Expr_3\;\Varid{d})\;(Expr_3\;\Varid{d}){}\<[E]%
+\\
+\>[19]{}\mid {}\<[19E]%
+\>[22]{}{\bf forall\ }\Varid{x}\hsforall \hsdot{\circ }{.}{}\<[33]%
+\>[33]{}Ext_3\;{}\<[40]%
+\>[40]{}(\Varid{d}\;\Varid{x})\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{15E}{@{}l@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{36}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Sub_3\;\Varid{d}{}\<[15]%
+\>[15]{}\mathrel{=}{}\<[15E]%
+\>[29]{}Sub_3\;{}\<[36]%
+\>[36]{}(Expr_3\;\Varid{d})\;(Expr_3\;\Varid{d}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The \ensuremath{\Varid{d}} type variable is inhabited by an explicit dictionary for the semantics, i.e.\ a witness to the class instance.
+Therefore, for all semantics type classes, a data type is made that contains the semantics function for the given semantics.
+This means that for \ensuremath{Eval_3}, a dictionary with the function \ensuremath{EvalDict_3} is defined, a type class \ensuremath{HasEval_3} for retrieving the function from the dictionary and an instance for \ensuremath{HasEval_3} for \ensuremath{EvalDict_3}.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;EvalDict_3\;\Varid{v}\mathrel{=}EvalDict_3\;(\Varid{v}\to \Conid{Int}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;HasEval_3\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getEval_3\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\to \Conid{Int}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasEval_3\;EvalDict_3\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getEval_3\;(EvalDict_3\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+The instances for the type classes change as well according to the change in the datatype.
+Given that there is a \ensuremath{HasEval_3} instance for the witness type \ensuremath{\Varid{d}}, we can provide an implementation of \ensuremath{Eval_3} for \ensuremath{Expr_3\;\Varid{d}}.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_3\;\Varid{d}\Rightarrow Eval_3\;(Expr_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_3\;(Lit_3\;{}\<[20]%
+\>[20]{}\Varid{v}){}\<[28]%
+\>[28]{}\mathrel{=}\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_3\;(Add_3\;{}\<[20]%
+\>[20]{}e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}eval_3\;e_1\mathbin{+}eval_3\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_3\;(Ext_3\;{}\<[20]%
+\>[20]{}\Varid{d}\;\Varid{x}){}\<[28]%
+\>[28]{}\mathrel{=}getEval_3\;\Varid{d}\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_3\;\Varid{d}\Rightarrow Eval_3\;(Sub_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_3\;(Sub_3\;e_1\;e_2)\mathrel{=}eval_3\;e_1\mathbin{-}eval_3\;e_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Because the \ensuremath{Ext_3} constructor from \ensuremath{Expr_3} now contains a value of type \ensuremath{\Varid{d}}, the smart constructor for \ensuremath{Sub_3} must somehow come up with this value.
+To achieve this, a type class is introduced that allows the generation of such a dictionary.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{GDict}\;\Varid{a}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathbin{::}\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+This type class has individual instances for all semantics dictionaries, linking the class instance to the witness value.
+I.e.\ if there is a type class instance known, a witness value can be conjured using the \ensuremath{\Varid{gdict}} function.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;Eval_3\;\Varid{v}\Rightarrow \Conid{GDict}\;(EvalDict_3\;\Varid{v})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}EvalDict_3\;eval_3{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+With these instances, the semantics function can be retrieved from the \ensuremath{Ext_3} constructor and in the smart constructors they can be generated as follows:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}sub_3\mathbin{::}\Conid{GDict}\;(\Varid{d}\;(Sub_3\;\Varid{d}))\Rightarrow Expr_3\;\Varid{d}\to Expr_3\;\Varid{d}\to Expr_3\;\Varid{d}{}\<[E]%
+\\
+\>[B]{}sub_3\;e_1\;e_2\mathrel{=}Ext_3\;\Varid{gdict}\;(Sub_3\;e_1\;e_2){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Finally, we reached the end goal, orthogonal extension of both language constructs as shown by adding subtraction to the language and in language semantics.
+Adding the printer can now be done without touching the original code as follows.
+First the printer type class, dictionaries and instances for \ensuremath{\Conid{GDict}} are defined.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Print_3\;\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_3\mathbin{::}\Varid{v}\to \Conid{String}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{newtype}\;PrintDict_3\;\Varid{v}\mathrel{=}PrintDict_3\;(\Varid{v}\to \Conid{String}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;HasPrint_3\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getPrint_3\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\to \Conid{String}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasPrint_3\;PrintDict_3\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getPrint_3\;(PrintDict_3\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Print_3\;\Varid{v}\Rightarrow \Conid{GDict}\;(PrintDict_3\;\Varid{v})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}PrintDict_3\;print_3{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Then the instances for \ensuremath{Print_3} of all the language constructs can be defined.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{21}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{29E}{@{}l@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_3\;\Varid{d}\Rightarrow Print_3\;(Expr_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_3\;(Lit_3\;{}\<[21]%
+\>[21]{}\Varid{v}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}\Varid{show}\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_3\;(Add_3\;{}\<[21]%
+\>[21]{}e_1\;e_2){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}\text{\ttfamily \char34 (\char34}\plus print_3\;e_1\plus \text{\ttfamily \char34 +\char34}\plus print_3\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_3\;(Ext_3\;{}\<[21]%
+\>[21]{}\Varid{d}\;\Varid{x}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}getPrint_3\;\Varid{d}\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_3\;\Varid{d}\Rightarrow Print_3\;(Sub_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_3\;(Sub_3\;e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}\text{\ttfamily \char34 (\char34}\plus print_3\;e_1\plus \text{\ttfamily \char34 -\char34}\plus print_3\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Transformation semantics}%
+\label{sec:transformation}
+
+Most semantics convert a term to some final representation and can be expressed just by functions on the cases.
+However, the implementation of semantics such as transformation or optimisation may benefit from a so-called intentional analysis of the abstract syntax tree.
+In shallow embedding, the implementation for these types of semantics is difficult because there is no tangible abstract syntax tree.
+In off-the-shelf deep embedding this is effortless since the function can pattern match on the constructor or structures of constructors.
+
+To demonstrate intensional analyses in classy deep embedding we write an optimizer that removes addition and subtraction by zero.
+In classy deep embedding, adding new semantics means first adding a new type class housing the function including the machinery for the extension constructor.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Opt_3\;\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_3\mathbin{::}\Varid{v}\to \Varid{v}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{newtype}\;OptDict_3\;\Varid{v}\mathrel{=}OptDict_3\;(\Varid{v}\to \Varid{v}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;HasOpt_3\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getOpt_3\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\to \Varid{v}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasOpt_3\;OptDict_3\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getOpt_3\;(OptDict_3\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;Opt_3\;\Varid{v}\Rightarrow \Conid{GDict}\;(OptDict_3\;\Varid{v})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}OptDict_3\;opt_3{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The implementation of the optimizer for the \ensuremath{Expr_3} data type is no complicated task.
+The only interesting bit occurs in the \ensuremath{Add_3} constructor, where we pattern match on the optimised children to determine whether an addition with zero is performed.
+If this is the case, the addition is removed.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_3\;\Varid{d}\Rightarrow Opt_3\;(Expr_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_3\;(Lit_3\;{}\<[19]%
+\>[19]{}\Varid{v}){}\<[27]%
+\>[27]{}\mathrel{=}Lit_3\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_3\;(Add_3\;{}\<[19]%
+\>[19]{}e_1\;e_2){}\<[27]%
+\>[27]{}\mathrel{=}\mathbf{case}\;(opt_3\;e_1,opt_3\;e_2)\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(Lit_3\;\mathrm{0},{}\<[20]%
+\>[20]{}e_2^\prime{}\<[29]%
+\>[29]{})\to e_2^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[20]%
+\>[20]{}Lit_3\;\mathrm{0}{}\<[29]%
+\>[29]{})\to e_1^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[20]%
+\>[20]{}e_2^\prime{}\<[29]%
+\>[29]{})\to Add_3\;e_1^\prime\;e_2^\prime{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_3\;(Ext_3\;{}\<[19]%
+\>[19]{}\Varid{d}\;\Varid{x}){}\<[27]%
+\>[27]{}\mathrel{=}Ext_3\;\Varid{d}\;(getOpt_3\;\Varid{d}\;\Varid{x}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Replicating this for the \ensuremath{Opt_3} instance of \ensuremath{Sub_3} seems a clear-cut task at first glance.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_3\;\Varid{d}\Rightarrow Opt_3\;(Sub_3\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_3\;(Sub_3\;e_1\;e_2)\mathrel{=}\mathbf{case}\;(opt_3\;e_1,opt_3\;e_2)\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,Lit_3\;\mathrm{0}{}\<[24]%
+\>[24]{})\to e_1^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,e_2^\prime{}\<[24]%
+\>[24]{})\to Sub_3\;e_1^\prime\;e_2^\prime{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Unsurprisingly, this code is rejected by the compiler.
+When a literal zero is matched as the right-hand side of a subtraction, the left-hand side of type \ensuremath{Expr_3} is returned.
+However, the type signature of the function dictates that it should be of type \ensuremath{Sub_3}.
+To overcome this problem we add a convolution constructor.
+
+\subsection{Convolution}%
+\label{ssec:convolution}
+
+Adding a loopback case or convolution constructor to \ensuremath{Sub_3} allows the removal of the \ensuremath{Sub_3} constructor while remaining the \ensuremath{Sub_3} type.
+It should be noted that a loopback case is \emph{only} required if the transformation actually removes tags.
+This changes the \ensuremath{Sub_3} data type as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{15E}{@{}l@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Sub_4\;\Varid{d}{}\<[15]%
+\>[15]{}\mathrel{=}{}\<[15E]%
+\>[18]{}Sub_4\;{}\<[29]%
+\>[29]{}(Expr_4\;\Varid{d})\;(Expr_4\;\Varid{d}){}\<[E]%
+\\
+\>[15]{}\mid {}\<[15E]%
+\>[18]{}SubLoop_4\;{}\<[29]%
+\>[29]{}(Expr_4\;\Varid{d}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasEval_4\;\Varid{d}\Rightarrow Eval_4\;(Sub_4\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_4\;(Sub_4\;{}\<[24]%
+\>[24]{}e_1\;e_2){}\<[32]%
+\>[32]{}\mathrel{=}eval_4\;e_1\mathbin{-}eval_4\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_4\;(SubLoop_4\;{}\<[24]%
+\>[24]{}e_1){}\<[32]%
+\>[32]{}\mathrel{=}eval_4\;e_1{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+With this loopback case in the toolbox, the following \ensuremath{\Conid{Sub}} instance optimises away subtraction with zero literals.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_4\;\Varid{d}\Rightarrow Opt_4\;(Sub_4\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;(Sub_4\;{}\<[19]%
+\>[19]{}e_1\;e_2){}\<[27]%
+\>[27]{}\mathrel{=}\mathbf{case}\;(opt_4\;e_1,opt_4\;e_2)\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,Lit_4\;\mathrm{0}{}\<[24]%
+\>[24]{})\to SubLoop_4\;e_1^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,e_2^\prime{}\<[24]%
+\>[24]{})\to Sub_4\;e_1^\prime\;e_2^\prime{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;(SubLoop_4\;\Varid{e}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[30]%
+\>[30]{}SubLoop_4\;(opt_4\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Pattern matching}%
+\label{ssec:pattern}
+
+Pattern matching within datatypes and from an extension to the main data type works out of the box.
+Cross-extensional pattern matching on the other hand---matching on a particular extension---is something that requires a bit of extra care.
+Take for example negation propagation and double negation elimination.
+Pattern matching on values with an existential type is not possible without leveraging dynamic typing~\cite{abadi_dynamic_1991,baars_typing_2002}.
+To enable dynamic typing support, the \ensuremath{\Conid{Typeable}} type class as provided by \ensuremath{\Conid{\Conid{Data}.Dynamic}}~\cite{ghc_team_datadynamic_2021} is added to the list of constraints in all places where we need to pattern match across extensions.
+As a result, the \ensuremath{\Conid{Typeable}} type class constraints are added to the quantified type variable \ensuremath{\Varid{x}} of the \ensuremath{Ext_4} constructor and to \ensuremath{\Varid{d}}s in the smart constructors.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{16E}{@{}l@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{51}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_4\;\Varid{d}{}\<[16]%
+\>[16]{}\mathrel{=}{}\<[16E]%
+\>[44]{}Lit_4\;{}\<[51]%
+\>[51]{}\Conid{Int}{}\<[E]%
+\\
+\>[16]{}\mid {}\<[16E]%
+\>[44]{}Add_4\;{}\<[51]%
+\>[51]{}(Expr_4\;\Varid{d})\;(Expr_4\;\Varid{d}){}\<[E]%
+\\
+\>[16]{}\mid {}\<[16E]%
+\>[19]{}{\bf forall\ }\Varid{x}\hsforall \hsdot{\circ }{.}\Conid{Typeable}\;\Varid{x}\Rightarrow {}\<[44]%
+\>[44]{}Ext_4\;{}\<[51]%
+\>[51]{}(\Varid{d}\;\Varid{x})\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+First let us add negation to the language by defining a datatype representing it.
+Negation elimination requires the removal of negation constructors, so a convolution constructor is defined as well.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{15E}{@{}l@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Neg_4\;\Varid{d}{}\<[15]%
+\>[15]{}\mathrel{=}{}\<[15E]%
+\>[18]{}Neg_4\;{}\<[29]%
+\>[29]{}(Expr_4\;\Varid{d}){}\<[E]%
+\\
+\>[15]{}\mid {}\<[15E]%
+\>[18]{}NegLoop_4\;{}\<[29]%
+\>[29]{}(Expr_4\;\Varid{d}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}neg_4\mathbin{::}(\Conid{Typeable}\;\Varid{d},\Conid{GDict}\;(\Varid{d}\;(Neg_4\;\Varid{d})))\Rightarrow Expr_4\;\Varid{d}\to Expr_4\;\Varid{d}{}\<[E]%
+\\
+\>[B]{}neg_4\;\Varid{e}\mathrel{=}Ext_4\;\Varid{gdict}\;(Neg_4\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The evaluation and printer instances for the \ensuremath{Neg_4} datatype are defined as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{26}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_4\;\Varid{d}\Rightarrow Eval_4\;(Neg_4\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_4\;{}\<[13]%
+\>[13]{}(Neg_4\;{}\<[25]%
+\>[25]{}\Varid{e}){}\<[29]%
+\>[29]{}\mathrel{=}\Varid{negate}\;(eval_4\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_4\;{}\<[13]%
+\>[13]{}(NegLoop_4\;{}\<[25]%
+\>[25]{}\Varid{e}){}\<[29]%
+\>[29]{}\mathrel{=}eval_4\;\Varid{e}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasPrint_4\;\Varid{d}\Rightarrow Print_4\;(Neg_4\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_4\;{}\<[14]%
+\>[14]{}(Neg_4\;{}\<[26]%
+\>[26]{}\Varid{e}){}\<[30]%
+\>[30]{}\mathrel{=}\text{\ttfamily \char34 (\char126 \char34}\plus print_4\;\Varid{e}\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_4\;{}\<[14]%
+\>[14]{}(NegLoop_4\;{}\<[26]%
+\>[26]{}\Varid{e}){}\<[30]%
+\>[30]{}\mathrel{=}print_4\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The \ensuremath{Opt_4} instance contains the interesting bit.
+If the sub expression of a negation is an addition, negation is propagated downwards.
+If the sub expression is again a negation, something that can only be found out by a dynamic pattern match, it is replaced by a \ensuremath{NegLoop_4} constructor.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;(\Conid{Typeable}\;\Varid{d},\Conid{GDict}\;(\Varid{d}\;(Neg_4\;\Varid{d})),HasOpt_4\;\Varid{d})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{9}{}\<[9]%
+\>[9]{}Opt_4\;(Neg_4\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;{}\<[12]%
+\>[12]{}(Neg_4\;{}\<[20]%
+\>[20]{}(Add_4\;e_1\;e_2)){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\mathrel{=}NegLoop_4\;(Add_4\;(opt_4\;(neg_4\;e_1))\;(opt_4\;(neg_4\;e_2))){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;{}\<[12]%
+\>[12]{}(Neg_4\;{}\<[20]%
+\>[20]{}(Ext_4\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\mathrel{=}\mathbf{case}\;\Varid{fromDynamic}\;(\Varid{toDyn}\;(getOpt_4\;\Varid{d}\;\Varid{x}))\;\mathbf{of}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\Conid{Just}\;(Neg_4\;\Varid{e}){}\<[29]%
+\>[29]{}\to NegLoop_4\;\Varid{e}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\anonymous {}\<[29]%
+\>[29]{}\to Neg_4\;(Ext_4\;\Varid{d}\;(getOpt_4\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;{}\<[12]%
+\>[12]{}(Neg_4\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}Neg_4\;(opt_4\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_4\;{}\<[12]%
+\>[12]{}(NegLoop_4\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}NegLoop_4\;(opt_4\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Loopback cases do make cross-extensional pattern matching less modular in general.
+For example, \ensuremath{Ext_4\;\Varid{d}\;(SubLoop_4\;(Lit_4\;\mathrm{0}))} is equivalent to \ensuremath{Lit_4\;\mathrm{0}} in the optimisation semantics and would require an extra pattern match.
+Fortunately, this problem can be mitigated---if required---by just introducing an additional optimisation semantics that removes loopback cases.
+Luckily, one does not need to resort to these arguably blunt matters often.
+Dependent language functionality often does not need to span extensions, i.e.\ it is possible to group them in the same data type.
+
+\subsection{Chaining semantics}
+Now that the data types are parametrised by the semantics a final problem needs to be overcome.
+The data type is parametrised by the semantics, thus, using multiple semantics, such as evaluation after optimising is not straightforwardly possible.
+Luckily, a solution is readily at hand: introduce an ad-hoc combination semantics.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;OptPrintDict_4\;\Varid{v}\mathrel{=}OPD_4\;(OptDict_4\;\Varid{v})\;(PrintDict_4\;\Varid{v}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasOpt_4\;{}\<[22]%
+\>[22]{}OptPrintDict_4\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getOpt_4\;{}\<[17]%
+\>[17]{}(OPD_4\;{}\<[25]%
+\>[25]{}\Varid{v}\;{}\<[28]%
+\>[28]{}\anonymous ){}\<[32]%
+\>[32]{}\mathrel{=}getOpt_4\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;HasPrint_4\;{}\<[22]%
+\>[22]{}OptPrintDict_4\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getPrint_4\;{}\<[17]%
+\>[17]{}(OPD_4\;{}\<[25]%
+\>[25]{}\anonymous \;{}\<[28]%
+\>[28]{}\Varid{v}){}\<[32]%
+\>[32]{}\mathrel{=}getPrint_4\;\Varid{v}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;(Opt_4\;\Varid{v},Print_4\;\Varid{v})\Rightarrow \Conid{GDict}\;(OptPrintDict_4\;\Varid{v})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}OPD_4\;\Varid{gdict}\;\Varid{gdict}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+And this allows us to write \ensuremath{print_4\;(opt_4\;e_1)} resulting in \ensuremath{\text{\ttfamily \char34 ((\char126 42)+(\char126 38))\char34}} when \ensuremath{e_1} represents $(\sim(42+38))-0$ and is thus defined as follows.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}e_1\mathbin{::}Expr_4\;OptPrintDict_4{}\<[E]%
+\\
+\>[B]{}e_1\mathrel{=}neg_4\;(Lit_4\;\mathrm{42}\mathbin{`Add_4`}Lit_4\;\mathrm{38})\mathbin{`sub_4`}Lit_4\;\mathrm{0}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+When using classy deep embedding to the fullest, the ability of the compiler to infer very general types expires.
+As a consequence, defining reusable expressions that are overloaded in their semantics requires quite some type class constraints that cannot be inferred by the compiler (yet) if they use many extensions.
+Solving this remains future work.
+For example, the expression $\sim(42-38)+1$ has to be defined as:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{e3}\mathbin{::}{}\<[8]%
+\>[8]{}(\Conid{Typeable}\;\Varid{d}{}\<[E]%
+\\
+\>[8]{},\Conid{GDict}\;(\Varid{d}\;(Neg_4\;\Varid{d})){}\<[E]%
+\\
+\>[8]{},\Conid{GDict}\;(\Varid{d}\;(Sub_4\;\Varid{d})))\Rightarrow Expr_4\;\Varid{d}{}\<[E]%
+\\
+\>[B]{}\Varid{e3}\mathrel{=}neg_4\;(Lit_4\;\mathrm{42}\mathbin{`sub_4`}Lit_4\;\mathrm{38})\mathbin{`Add_4`}Lit_4\;\mathrm{1}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Generalised algebraic data types}%
+\label{sec:generalisation}
+Generalised algebraic data types (GADTs) are enriched data types that allow the type instantiation of the constructor to be explicitly defined~\cite{cheney_first-class_2003,hinze_fun_2003}.
+Leveraging GADTs, deeply embedded DSLs can be made statically type safe even when different value types are supported.
+Even when GADTs are not supported natively in the language, they can be simulated using embedding-projection pairs or equivalence types~\cite[Sec.~2.2]{cheney_lightweight_2002}.
+Where some solutions to the expression problem do not easily generalise to GADTs (see Section~\ref{sec:related}), classy deep embedding does.
+Generalising the data structure of our DSL is fairly straightforward and to spice things up a bit, we add an equality and boolean not language construct.
+To make the existing DSL constructs more general, we relax the types of those constructors.
+For example, operations on integers now work on all numerals instead.
+Moreover, the \ensuremath{Lit_g} constructor can be used to lift values of any type to the DSL domain as long as they have a \ensuremath{\Conid{Show}} instance, required for the printer.
+Since some optimisations on \ensuremath{Not_g} remove constructors and therefore use cross-extensional pattern matches, \ensuremath{\Conid{Typeable}} constraints are added to \ensuremath{\Varid{a}}.
+Furthermore, because the optimisations for \ensuremath{Add_g} and \ensuremath{Sub_g} are now more general, they do not only work for \ensuremath{\Conid{Int}}s but for any type with a \ensuremath{\Conid{Num}} instance, the \ensuremath{\Conid{Eq}} constraint is added to these constructors as well.
+Finally, not to repeat ourselves too much, we only show the parts that substantially changed.
+The omitted definitions and implementation can be found in Appendix~\ref{sec:appendix}.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{16E}{@{}l@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{35E}{@{}l@{}}%
+\column{39}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Expr_g\;\Varid{d}\;\Varid{a}\;{}\<[19]%
+\>[19]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Lit_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}\Conid{Show}\;\Varid{a}{}\<[35]%
+\>[35]{}\Rightarrow {}\<[35E]%
+\>[39]{}\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Add_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}(\Conid{Eq}\;\Varid{a},\Conid{Num}\;\Varid{a}){}\<[35]%
+\>[35]{}\Rightarrow {}\<[35E]%
+\>[39]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Ext_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}\Conid{Typeable}\;\Varid{x}{}\<[35]%
+\>[35]{}\Rightarrow {}\<[35E]%
+\>[39]{}\Varid{d}\;\Varid{x}\to \Varid{x}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;Neg_g\;\Varid{d}\;\Varid{a}\;{}\<[19]%
+\>[19]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Neg_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}(\Conid{Typeable}\;\Varid{a},\Conid{Num}\;\Varid{a})\Rightarrow {}\<[44]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Neg_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}NegLoop_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Neg_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;Not_g\;\Varid{d}\;\Varid{a}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Not_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}Expr_g\;\Varid{d}\;\Conid{Bool}\to Not_g\;\Varid{d}\;\Conid{Bool}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}NotLoop_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}Expr_g\;\Varid{d}\;\Varid{a}\to Not_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The smart constructors for the language extensions inherit the class constraints of their data types and include a \ensuremath{\Conid{Typeable}} constraint on the \ensuremath{\Varid{d}} type variable for it to be usable in the \ensuremath{Ext_g} constructor as can be seen in the smart constructor for \ensuremath{Neg_g}:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}neg_g{}\<[8]%
+\>[8]{}\mathbin{::}(\Conid{Typeable}\;\Varid{d},\Conid{GDict}\;(\Varid{d}\;(Neg_g\;\Varid{d})),\Conid{Typeable}\;\Varid{a},\Conid{Num}\;\Varid{a})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}neg_g\;\Varid{e}\mathrel{=}Ext_g\;\Varid{gdict}\;(Neg_g\;\Varid{e}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}not_g{}\<[8]%
+\>[8]{}\mathbin{::}(\Conid{Typeable}\;\Varid{d},{}\<[25]%
+\>[25]{}\Conid{GDict}\;(\Varid{d}\;(Not_g\;\Varid{d})))\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Expr_g\;\Varid{d}\;\Conid{Bool}\to Expr_g\;\Varid{d}\;\Conid{Bool}{}\<[E]%
+\\
+\>[B]{}not_g\;\Varid{e}\mathrel{=}Ext_g\;\Varid{gdict}\;(Not_g\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Upgrading the semantics type classes to support GADTs is done by an easy textual search and replace.
+All occurrences of \ensuremath{\Varid{v}} are now parametrised by type variable \ensuremath{\Varid{a}}:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;Eval_g\;{}\<[16]%
+\>[16]{}\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g{}\<[14]%
+\>[14]{}\mathbin{::}\Varid{v}\;\Varid{a}\to \Varid{a}{}\<[E]%
+\\
+\>[B]{}\mathbf{class}\;Print_g\;{}\<[16]%
+\>[16]{}\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g{}\<[14]%
+\>[14]{}\mathbin{::}\Varid{v}\;\Varid{a}\to \Conid{String}{}\<[E]%
+\\
+\>[B]{}\mathbf{class}\;Opt_g\;{}\<[16]%
+\>[16]{}\Varid{v}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g{}\<[14]%
+\>[14]{}\mathbin{::}\Varid{v}\;\Varid{a}\to \Varid{v}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Now that the shape of the type classes has changed, the dictionary data types and the type classes need to be adapted as well.
+The introduced type variable \ensuremath{\Varid{a}} is not an argument to the type class, so it should not be an argument to the dictionary data type.
+To represent this type class function, a rank-2 polymorphic function is needed~\cite[Chp.~6.4.15]{ghc_team_ghc_2021}\cite{odersky_putting_1996}.
+Concretely, for the evaluatior this results in the following definitions:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;EvalDict_g\;\Varid{v}\mathrel{=}EvalDict_g\;({\bf forall\ }\Varid{a}\hsforall \hsdot{\circ }{.}\Varid{v}\;\Varid{a}\to \Varid{a}){}\<[E]%
+\\
+\>[B]{}\mathbf{class}\;HasEval_g\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getEval_g\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\;\Varid{a}\to \Varid{a}{}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;HasEval_g\;EvalDict_g\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getEval_g\;(EvalDict_g\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The \ensuremath{\Conid{GDict}} type class is general enough, so the instances can remain the same.
+The \ensuremath{Eval_g} instance of \ensuremath{\Conid{GDict}} looks as follows:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;Eval_g\;\Varid{v}\Rightarrow \Conid{GDict}\;(EvalDict_g\;\Varid{v})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}EvalDict_g\;eval_g{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Finally, the implementations for the instances can be ported without complication show using the optimisation instance of \ensuremath{Not_g}:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{27E}{@{}l@{}}%
+\column{29}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{29E}{@{}l@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{33}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;(\Conid{Typeable}\;\Varid{d},\Conid{GDict}\;(\Varid{d}\;(Not_g\;\Varid{d})),HasOpt_g\;\Varid{d})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{9}{}\<[9]%
+\>[9]{}Opt_g\;(Not_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Not_g\;(Ext_g\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\mathrel{=}\mathbf{case}\;\Varid{fromDynamic}\;(\Varid{toDyn}\;(getOpt_g\;\Varid{d}\;\Varid{x}))\mathbin{::}\Conid{Maybe}\;(Not_g\;\Varid{d}\;\Conid{Bool})\;\mathbf{of}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\Conid{Just}\;(Not_g\;\Varid{e}){}\<[29]%
+\>[29]{}\to {}\<[29E]%
+\>[33]{}NotLoop_g\;\Varid{e}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\anonymous {}\<[29]%
+\>[29]{}\to {}\<[29E]%
+\>[33]{}Not_g\;(Ext_g\;\Varid{d}\;(getOpt_g\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Not_g\;\Varid{e}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}Not_g\;(opt_g\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(NotLoop_g\;{}\<[23]%
+\>[23]{}\Varid{e}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}NotLoop_g\;(opt_g\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Conclusion}%
+\label{sec:conclusion}
+
+Classy deep embedding is a novel organically grown embedding technique that alleviates deep embedding from the extensibility problem in most cases.
+
+By abstracting the semantics functions to type classes they become overloaded in the language constructs.
+Thus, making it possible to add new language constructs in a separate type.
+These extensions are brought together in a special extension constructor residing in the main data type.
+This extension case is overloaded by the language construct using a data type containing the class dictionary.
+As a result, orthogonal extension is possible for language constructs and semantics using only little syntactic overhead or type annotations.
+The basic technique only requires---well established through history and relatively standard---existential data types.
+However, if needed, the technique generalises to GADTs as well, adding rank-2 types to the list of type system requirements as well.
+Finally, the abstract syntax tree remains observable which makes it suitable for intensional analyses, albeit using occasional dynamic typing for truly cross-extensional transformations.
+
+Defining reusable expressions overloaded in semantics or using multiple semantics on a single expression requires some boilerplate still, getting around this remains future work.
+
+\section{Related work}%
+\label{sec:related}
+
+Embedded DSL techniques in functional languages have been a topic of research for many years, thus we do not claim a complete overview of related work.
+
+Clearly, classy deep embedding bears most similarity to the \emph{Datatypes \`a la Carte}~\cite{swierstra_data_2008}.
+In Swierstra's approach, semantics are lifted to type classes similarly to classy deep embedding.
+Each language construct is their own datatype parametrised by a type parameter.
+This parameter contains some type level representation of language constructs that are in use.
+In classy deep embedding, extensions do not have to be enumerated at the type level but are captured in the extension case.
+Because all the constructs are expressed in the type system, nifty type system tricks need to be employed to convince the compiler that everything is type safe and the class constraints can be solved.
+Furthermore, it requires some boilerplate code such as functor instances for the data types.
+In return, pattern matching is easier and does not require dynamic typing.
+Classy deep embedding only strains the programmer with writing the extension case for the main data type and the occasional loopback constructor.
+
+L\"oh and Hinze proposed a language extension that allows open data types and open functions, i.e.\ functions and data types that can be extended with more cases later on~\cite{loh_open_2006}.
+They hinted at the possibility of using type classes for open functions but had serious concerns that pattern matching would be crippled because constructors are becoming types, thus ultimately becoming impossible to type.
+In contrast, this paper shows that pattern matching is easily attainable---albeit using dynamic types---and that the terms can be typed without complicated type system extensions.
+
+A technique similar to classy deep embedding was proposed by Najd and Peyton~Jones to tackle a slightly different problem, namely that of reusing a data type for multiple purposes in a slightly different form~\cite{najd_trees_2017}.
+For example to decorate the abstract syntax tree of a compiler differently for each phase of the compiler.
+They propose to add an extension descriptor as a type variable to a data type and a type family that can be used to decorate constructors with extra information and add additional constructors to the data type using an extension constructor.
+Classy deep embedding works similarly but uses existentially quantified type variables to describe possible extensions instead of type variables and type families.
+In classy deep embedding, the extensions do not need to be encoded in the type system and less boilerplate is required.
+Furthermore, pattern matching on extensions becomes a bit more complicated but in return it allows for multiple extensions to be added orthogonally and avoids the necessity for type system extensions.
+
+Tagless-final embedding is the shallowly embedded counterpart of classy deep embedding and was invented for the same purpose; overcoming the issues with standard shallow embedding~\cite{carette_finally_2009}.
+Classy deep embedding was organically grown from observing the evolution of tagless-final embedding.
+The main difference between tagless-final embedding and classy deep embedding---and in general between shallow and deep embedding---is that intensional analyses of the abstract syntax tree is more difficult because there is no tangible abstract syntax tree data structure.
+In classy deep embedding, it is possible to define transformations even across extensions.
+
+Hybrid approaches between deep and shallow embedding exist as well.
+For example, Svenningson et al.\ show that by expressing the deeply embedded language in a shallowly embedded core language, extensions can be made orthogonally as well~\cite{svenningsson_combining_2013}.
+This paper differs from those approaches in the sense that it does not require a core language in which all extensions need to be expressible.
+
+\section*{Acknowledgements}\label{sec:acknowledgements}
+This research is partly funded by the Royal Netherlands Navy.
+Furthermore, I would like to thank Pieter and Rinus for the fruitful discussions, Ralf for inspiring me to write a functional pearl, and the anonymous reviewers for their valuable and honest comments.
+
+\bibliographystyle{splncs04}
+\bibliography{refs}
+
+\appendix
+\section{Appendix}%
+\label{sec:appendix}
+\subsection{Data type definitions}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{15E}{@{}l@{}}%
+\column{16}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{16E}{@{}l@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{40}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{40E}{@{}l@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;Sub_g\;\Varid{d}\;\Varid{a}\;{}\<[19]%
+\>[19]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Sub_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[20]{}(\Conid{Eq}\;\Varid{a},\Conid{Num}\;\Varid{a}){}\<[40]%
+\>[40]{}\Rightarrow {}\<[40E]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}\to Sub_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}SubLoop_g{}\<[16]%
+\>[16]{}\mathbin{::}{}\<[16E]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Sub_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;Eq_g\;\Varid{d}\;\Varid{a}\;{}\<[19]%
+\>[19]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Eq_g{}\<[15]%
+\>[15]{}\mathbin{::}{}\<[15E]%
+\>[20]{}(\Conid{Typeable}\;\Varid{a},\Conid{Eq}\;\Varid{a}){}\<[40]%
+\>[40]{}\Rightarrow {}\<[40E]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}\to Eq_g\;\Varid{d}\;\Conid{Bool}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}EqLoop_g{}\<[15]%
+\>[15]{}\mathbin{::}{}\<[15E]%
+\>[44]{}Expr_g\;\Varid{d}\;\Varid{a}\to Eq_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Smart constructors}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}sub_g{}\<[8]%
+\>[8]{}\mathbin{::}(\Conid{Typeable}\;\Varid{d},{}\<[25]%
+\>[25]{}\Conid{GDict}\;(\Varid{d}\;(Sub_g\;\Varid{d})),\Conid{Eq}\;\Varid{a},\Conid{Num}\;\Varid{a})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}sub_g\;e_1\;e_2\mathrel{=}Ext_g\;\Varid{gdict}\;(Sub_g\;e_1\;e_2){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}eq_g{}\<[8]%
+\>[8]{}\mathbin{::}(\Conid{Typeable}\;\Varid{d},{}\<[25]%
+\>[25]{}\Conid{GDict}\;(\Varid{d}\;(Eq_g\;\Varid{d})),\Conid{Eq}\;\Varid{a},\Conid{Typeable}\;\Varid{a})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Varid{a}\to Expr_g\;\Varid{d}\;\Conid{Bool}{}\<[E]%
+\\
+\>[B]{}eq_g\;e_1\;e_2\mathrel{=}Ext_g\;\Varid{gdict}\;(Eq_g\;e_1\;e_2){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Semantics classes and data types}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;PrintDict_g\;\Varid{v}\mathrel{=}PrintDict_g\;({\bf forall\ }\Varid{a}\hsforall \hsdot{\circ }{.}\Varid{v}\;\Varid{a}\to \Conid{String}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;HasPrint_g\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getPrint_g\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\;\Varid{a}\to \Conid{String}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;PrintDict_g\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getPrint_g\;(PrintDict_g\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{newtype}\;OptDict_g\;\Varid{v}\mathrel{=}OptDict_g\;({\bf forall\ }\Varid{a}\hsforall \hsdot{\circ }{.}\Varid{v}\;\Varid{a}\to \Varid{v}\;\Varid{a}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;HasOpt_g\;\Varid{d}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getOpt_g\mathbin{::}\Varid{d}\;\Varid{v}\to \Varid{v}\;\Varid{a}\to \Varid{v}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;HasOpt_g\;OptDict_g\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}getOpt_g\;(OptDict_g\;\Varid{e})\mathrel{=}\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{\ensuremath{\Conid{GDict}} instances}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{21}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{21E}{@{}l@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;Print_g\;\Varid{v}{}\<[21]%
+\>[21]{}\Rightarrow {}\<[21E]%
+\>[25]{}\Conid{GDict}\;(PrintDict_g\;\Varid{v})\;{}\<[48]%
+\>[48]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}PrintDict_g\;print_g{}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;Opt_g\;\Varid{v}{}\<[21]%
+\>[21]{}\Rightarrow {}\<[21E]%
+\>[25]{}\Conid{GDict}\;(OptDict_g\;\Varid{v})\;{}\<[48]%
+\>[48]{}\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{gdict}\mathrel{=}OptDict_g\;opt_g{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Evaluator instances}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_g\;\Varid{d}\Rightarrow Eval_g\;(Expr_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Lit_g\;{}\<[20]%
+\>[20]{}\Varid{v}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Add_g\;{}\<[20]%
+\>[20]{}e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_g\;e_1\mathbin{+}eval_g\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Ext_g\;{}\<[20]%
+\>[20]{}\Varid{d}\;\Varid{x}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}getEval_g\;\Varid{d}\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{32E}{@{}l@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_g\;\Varid{d}\Rightarrow Eval_g\;(Sub_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Sub_g\;{}\<[24]%
+\>[24]{}e_1\;e_2){}\<[32]%
+\>[32]{}\mathrel{=}{}\<[32E]%
+\>[35]{}eval_g\;e_1\mathbin{-}eval_g\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(SubLoop_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[32]%
+\>[32]{}\mathrel{=}{}\<[32E]%
+\>[35]{}eval_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_g\;\Varid{d}\Rightarrow Eval_g\;(Neg_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Neg_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}\Varid{negate}\;(eval_g\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(NegLoop_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_g\;\Varid{d}\Rightarrow Eval_g\;(Eq_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Eq_g\;{}\<[19]%
+\>[19]{}e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_g\;e_1\equiv eval_g\;e_2{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(EqLoop_g\;{}\<[23]%
+\>[23]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasEval_g\;\Varid{d}\Rightarrow Eval_g\;(Not_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(Not_g\;{}\<[20]%
+\>[20]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}not\;(eval_g\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}eval_g\;(NotLoop_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}eval_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Printer instances}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{21}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{29E}{@{}l@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;\Varid{d}\Rightarrow Print_g\;(Expr_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Lit_g\;{}\<[21]%
+\>[21]{}\Varid{v}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}\Varid{show}\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Add_g\;{}\<[21]%
+\>[21]{}e_1\;e_2){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}\text{\ttfamily \char34 (\char34}\plus print_g\;e_1\plus \text{\ttfamily \char34 +\char34}\plus print_g\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Ext_g\;{}\<[21]%
+\>[21]{}\Varid{d}\;\Varid{x}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}getPrint_g\;\Varid{d}\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;\Varid{d}\Rightarrow Print_g\;(Sub_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Sub_g\;e_1\;e_2){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}\text{\ttfamily \char34 (\char34}\plus print_g\;e_1\plus \text{\ttfamily \char34 -\char34}\plus print_g\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(SubLoop_g\;\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}print_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{29E}{@{}l@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;\Varid{d}\Rightarrow Print_g\;(Neg_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Neg_g\;\Varid{e}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}\text{\ttfamily \char34 (negate~\char34}\plus print_g\;\Varid{e}\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(NegLoop_g\;{}\<[25]%
+\>[25]{}\Varid{e}){}\<[29]%
+\>[29]{}\mathrel{=}{}\<[29E]%
+\>[32]{}print_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{27E}{@{}l@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;\Varid{d}\Rightarrow Print_g\;(Eq_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Eq_g\;e_1\;e_2){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}\text{\ttfamily \char34 (\char34}\plus print_g\;e_1\plus \text{\ttfamily \char34 ==\char34}\plus print_g\;e_2\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(EqLoop_g\;\Varid{e}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}print_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{28E}{@{}l@{}}%
+\column{31}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasPrint_g\;\Varid{d}\Rightarrow Print_g\;(Not_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(Not_g\;\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}\text{\ttfamily \char34 (not~\char34}\plus print_g\;\Varid{e}\plus \text{\ttfamily \char34 )\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}print_g\;(NotLoop_g\;\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}{}\<[28E]%
+\>[31]{}print_g\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection{Optimisation instances}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{27E}{@{}l@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_g\;\Varid{d}\Rightarrow Opt_g\;(Expr_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Lit_g\;{}\<[19]%
+\>[19]{}\Varid{v}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}Lit_g\;\Varid{v}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Add_g\;{}\<[19]%
+\>[19]{}e_1\;e_2){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}\mathbf{case}\;(opt_g\;e_1,opt_g\;e_2)\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(Lit_g\;\mathrm{0},{}\<[20]%
+\>[20]{}e_2^\prime{}\<[29]%
+\>[29]{})\to e_2^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[20]%
+\>[20]{}Lit_g\;\mathrm{0}{}\<[29]%
+\>[29]{})\to e_1^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[20]%
+\>[20]{}e_2^\prime{}\<[29]%
+\>[29]{})\to Add_g\;e_1^\prime\;e_2^\prime{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Ext_g\;{}\<[19]%
+\>[19]{}\Varid{d}\;\Varid{x}){}\<[27]%
+\>[27]{}\mathrel{=}{}\<[27E]%
+\>[30]{}Ext_g\;\Varid{d}\;(getOpt_g\;\Varid{d}\;\Varid{x}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{31}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{31E}{@{}l@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_g\;\Varid{d}\Rightarrow Opt_g\;(Sub_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Sub_g\;{}\<[23]%
+\>[23]{}e_1\;e_2){}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}\mathbf{case}\;(opt_g\;e_1,opt_g\;e_2)\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[16]%
+\>[16]{}Lit_g\;\mathrm{0}{}\<[25]%
+\>[25]{})\to SubLoop_g\;e_1^\prime{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(e_1^\prime,{}\<[16]%
+\>[16]{}e_2^\prime{}\<[25]%
+\>[25]{})\to Sub_g\;e_1^\prime\;e_2^\prime{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(SubLoop_g\;{}\<[23]%
+\>[23]{}\Varid{e}){}\<[31]%
+\>[31]{}\mathrel{=}{}\<[31E]%
+\>[34]{}SubLoop_g\;(opt_g\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{28}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;(\Conid{Typeable}\;\Varid{d},\Conid{GDict}\;(\Varid{d}\;(Neg_g\;\Varid{d})),HasOpt_g\;\Varid{d})\Rightarrow {}\<[E]%
+\\
+\>[B]{}\hsindent{9}{}\<[9]%
+\>[9]{}Opt_g\;(Neg_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;{}\<[12]%
+\>[12]{}(Neg_g\;{}\<[20]%
+\>[20]{}(Add_g\;e_1\;e_2)){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\mathrel{=}NegLoop_g\;(Add_g\;(opt_g\;(neg_g\;e_1))\;(opt_g\;(neg_g\;e_2))){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;{}\<[12]%
+\>[12]{}(Neg_g\;{}\<[20]%
+\>[20]{}(Ext_g\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\mathrel{=}\mathbf{case}\;\Varid{fromDynamic}\;(\Varid{toDyn}\;(getOpt_g\;\Varid{d}\;\Varid{x}))\;\mathbf{of}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\Conid{Just}\;(Neg_g\;\Varid{e}){}\<[29]%
+\>[29]{}\to NegLoop_g\;\Varid{e}{}\<[E]%
+\\
+\>[9]{}\hsindent{4}{}\<[13]%
+\>[13]{}\anonymous {}\<[29]%
+\>[29]{}\to Neg_g\;(Ext_g\;\Varid{d}\;(getOpt_g\;\Varid{d}\;\Varid{x})){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;{}\<[12]%
+\>[12]{}(Neg_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}Neg_g\;(opt_g\;\Varid{e}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;{}\<[12]%
+\>[12]{}(NegLoop_g\;{}\<[24]%
+\>[24]{}\Varid{e}){}\<[28]%
+\>[28]{}\mathrel{=}NegLoop_g\;(opt_g\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{22}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{30E}{@{}l@{}}%
+\column{33}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;HasOpt_g\;\Varid{d}\Rightarrow Opt_g\;(Eq_g\;\Varid{d})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(Eq_g\;{}\<[22]%
+\>[22]{}e_1\;e_2){}\<[30]%
+\>[30]{}\mathrel{=}{}\<[30E]%
+\>[33]{}Eq_g\;(opt_g\;e_1)\;(opt_g\;e_2){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}opt_g\;(EqLoop_g\;{}\<[22]%
+\>[22]{}\Varid{e}){}\<[30]%
+\>[30]{}\mathrel{=}{}\<[30E]%
+\>[33]{}EqLoop_g\;(opt_g\;\Varid{e}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\end{document}
