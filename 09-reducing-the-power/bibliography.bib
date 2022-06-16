@@ -1,0 +1,332 @@
+@inproceedings{plasmeijer_task-oriented_2012,
+author = {Plasmeijer, Rinus and Lijnse, Bas and Michels, Steffen and Achten, Peter and Koopman, Pieter},
+title = {Task-Oriented Programming in a Pure Functional Language},
+year = {2012},
+isbn = {9781450315227},
+publisher = {ACM},
+address = {New York, NY, USA},
+doi = {10.1145/2370776.2370801},
+abstract = {Task-Oriented Programming (TOP) is a novel programming paradigm for the construction of distributed systems where users work together on the internet. When multiple users collaborate, they need to interact with each other frequently. TOP supports the definition of tasks that react to the progress made by others. With TOP, complex multi-user interactions can be programmed in a declarative style just by defining the tasks that have to be accomplished, thus eliminating the need to worry about the implementation detail that commonly frustrates the development of applications for this domain. TOP builds on four core concepts: tasks that represent computations or work to do which have an observable value that may change over time, data sharing enabling tasks to observe each other while the work is in progress, generic type driven generation of user interaction, and special combinators for sequential and parallel task composition. The semantics of these core concepts is defined in this paper. As an example we present the iTask3 framework, which embeds TOP in the functional programming language Clean.},
+booktitle = {Proceedings of the 14th Symposium on Principles and Practice of Declarative Programming},
+pages = {195–206},
+numpages = {12},
+keywords = {task-oriented programming, clean},
+location = {Leuven, Belgium},
+series = {PPDP '12}
+}
+
+@incollection{lubbers_writing_2019,
+	address = {Budapest, Hungary},
+	title = {Writing {Internet} of {Things} applications with {Task} {Oriented} {Programming}},
+	abstract = {The Internet of Things (IOT) is growing fast. In 2018, there was approximately one connected device per person on earth and the number has been growing ever since. The devices interact with the environment via diﬀerent modalities at the same time using sensors and actuators making the programs parallel. Yet, writing this type of programs is diﬃcult because the devices have little computation power and memory, the platforms are heterogeneous and the languages are low level. Task Oriented Programming (TOP) is a novel declarative programming language paradigm that is used to express coordination of work, collaboration of users and systems, the distribution of shared data and the human computer interaction. The mTask language is a specialized, yet full-ﬂedged, multi-backend TOP language for IOT devices. With the bytecode interpretation backend and the integration with iTasks, tasks can be executed on the device dynamically. This means that —according to the current state of aﬀairs— tasks can be tailor-made at run time, compiled to device-agnostic bytecode and shipped to the device for interpretation. Tasks sent to the device are fully integrated in iTasks to allow every form of interaction with the tasks such as observation of the task value and interaction with Shared Data Sources (SDSs). The application is —server and devices— are programmed in a single language, albeit using two embedded Domain Speciﬁc Languages (EDSLs).},
+	language = {en},
+	booktitle = {Central {European} {Functional} {Programming} {School}: 8th {Summer} {School}, {CEFP} 2019, {Budapest}, {Hungary}, {July} 17–21, 2019, {Revised} {Selected} {Papers}},
+	publisher = {Springer International Publishing},
+	author = {Lubbers, Mart and Koopman, Pieter and Plasmeijer, Rinus},
+	year = {in-press},
+	pages = {51},
+}
+
+@inproceedings{brus_clean_1987,
+	address = {Berlin, Heidelberg},
+	title = {Clean — {A} language for functional graph rewriting},
+	isbn = {978-3-540-47879-9},
+	abstract = {Clean is an experimental language for specifying functional computations in terms of graph rewriting. It is based on an extension of Term Rewriting Systems (TRS) in which the terms are replaced by graphs. Such a Graph Rewriting System (GRS) consists of a, possibly cyclic, directed graph, called the data graph and graph rewrite rules which specify how this data graph may be rewritten. Clean is designed to provide a firm base for functional programming. In particular, Clean is suitable as an intermediate language between functional languages and (parallel) target machine architectures. A sequential implementation of Clean on a conventional machine is described and its performance is compared with other systems. The results show that Clean can be efficiently implemented.},
+	booktitle = {Functional {Programming} {Languages} and {Computer} {Architecture}},
+	publisher = {Springer Berlin Heidelberg},
+	author = {Brus, T. H. and van Eekelen, M. C. J. D. and van Leer, M. O. and Plasmeijer, M. J.},
+	editor = {Kahn, Gilles},
+	year = {1987},
+	pages = {364--384},
+}
+@misc{Clean:language,
+	author = "{Clean team}",
+	title = "Clean 3.0 Language Report",
+	year = "2020",
+	url = "https://cloogle.org/doc",
+	note = "[Online; accessed 05-April-2022]"
+}
+
+
+@inproceedings{lubbers20tiered,
+author = {Lubbers, Mart and Koopman, Pieter and Ramsingh, Adrian and Singer, Jeremy and Trinder, Phil},
+title = {Tiered versus Tierless IoT Stacks: Comparing Smart Campus Software Architectures},
+year = {2020},
+isbn = {9781450387583},
+publisher = {ACM},
+address = {New York, NY, USA},
+doi = {10.1145/3410992.3411002},
+abstract = {Internet of Things (IoT) software stacks are notoriously complex, conventionally comprising multiple tiers/components and requiring that the developer not only uses multiple programming languages, but also correctly interoperate the components. A novel alternative is to use a single tierless language with a compiler that generates the code for each component, and for their correct interoperation.We report the first ever systematic comparison of tiered and tierless IoT software architectures. The comparison is based on two implementations of a non-trivial smart campus application. PRSS has a conventional tiered Python-based architecture, and Clean Wemos Super Sensors (CWSS) has a novel tierless architecture based on Clean and the iTask and mTask embedded DSLs. An operational comparison of CWSS and PRSS demonstrates that they have equivalent functionality, and that both meet the University of Glasgow (UoG) smart campus requirements.Crucially, the tierless CWSS stack requires 70% less code than the tiered PRSS stack. We analyse the impact of the following three main factors. (1) Tierless developers need to manage less interoperation: CWSS uses two DSLs in a single paradigm where PRSS uses five languages and three paradigms. (2) Tierless developers benefit from automatically generated, and hence correct, communication. (3) Tierless developers can exploit the powerful high-level abstractions such as Task Oriented Programming (TOP) in CWSS. A far smaller and single paradigm codebase improves software quality, dramatically reduces development time, and improves the maintainability of tierless stacks.},
+booktitle = {Proceedings of the 10th International Conference on the Internet of Things},
+articleno = {21},
+numpages = {9},
+keywords = {internet of things, network reliability, domain specific languages, software architectures},
+location = {Malm\"{o}, Sweden},
+series = {IoT '20}
+}
+@inproceedings{
+	TOP-ICFP07,
+	author      = {Plasmeijer, Rinus and Achten, Peter and Koopman, Pieter},
+	title       = {{iTasks}: {E}xecutable {S}pecifications of {I}nteractive {W}ork {F}low {S}ystems for the {W}eb},
+	booktitle   = {{P}roceedings of the 12th {ACM SIGPLAN} {I}nternational {C}onference on {F}unctional {P}rogramming ({ICFP} 2007)},
+	address     = {{F}reiburg, {G}ermany},
+	year        = 2007,
+	month       = {Oct 1--3},
+	publisher   = {ACM},
+	isbn        = "978-1-59593-815-2",
+	pages       = {141-152}
+}
+@inproceedings{TOP-PPDP12, 
+	author = {Plasmeijer, Rinus and Lijnse, Bas and Michels, Steffen and Achten, Peter and Koopman, Pieter},
+	title = {Task-Oriented Programming in a Pure Functional Language},
+	year = {2012},
+	isbn = {9781450315227},
+	publisher = {ACM},
+	address = {New York, NY, USA},
+	doi = {10.1145/2370776.2370801},
+	abstract = {Task-Oriented Programming (TOP) is a novel programming paradigm for the construction of distributed systems where users work together on the internet. When multiple users collaborate, they need to interact with each other frequently. TOP supports the definition of tasks that react to the progress made by others. With TOP, complex multi-user interactions can be programmed in a declarative style just by defining the tasks that have to be accomplished, thus eliminating the need to worry about the implementation detail that commonly frustrates the development of applications for this domain. TOP builds on four core concepts: tasks that represent computations or work to do which have an observable value that may change over time, data sharing enabling tasks to observe each other while the work is in progress, generic type driven generation of user interaction, and special combinators for sequential and parallel task composition. The semantics of these core concepts is defined in this paper. As an example we present the iTask3 framework, which embeds TOP in the functional programming language Clean.},
+	booktitle = {Proceedings of the 14th Symposium on Principles and Practice of Declarative Programming},
+	pages = {195–206},
+	numpages = {12},
+	keywords = {task-oriented programming, clean},
+	location = {Leuven, Belgium},
+	series = {PPDP '12}
+}
+@article{FinallyTagless,
+	author    = {Jacques Carette and Oleg Kiselyov and Chung{-}chieh Shan},
+	title     = {Finally tagless, partially evaluated: Tagless staged interpreters
+	for simpler typed languages},
+	journal   = {J. Funct. Program.},
+	volume    = {19},
+	number    = {5},
+	pages     = {509--543},
+	year      = {2009},
+	doi       = {10.1017/S0956796809007205},
+	timestamp = {Sun, 02 Jun 2019 21:00:12 +0200},
+	biburl    = {https://dblp.org/rec/journals/jfp/CaretteKS09.bib},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{koopman_task-based_2018,
+	address = {Vienna, Austria},
+	title = {A {Task}-{Based} {DSL} for {Microcomputers}},
+	copyright = {All rights reserved},
+	isbn = {978-1-4503-6355-6},
+	doi = {10.1145/3183895.3183902},
+	abstract = {The Internet of Things, IoT, makes small connected computing devices almost omnipresent. These devices have typically very limited computing power and severe memory restrictions to make them cheap and power efficient. These devices can interact with the environment via special sensors and actuators. Since each device controls several peripherals running interleaved, the control software is quite complicated and hard to maintain. Task Oriented Programming, TOP, offers lightweight communicating threads that can inspect each other’s intermediate results. This makes it well suited for the IoT. In this paper presents a functional task-based domain specific language for these IoT devices. We show that it yields concise control programs. By restricting the datatypes and using strict evaluation these programs fit within the restrictions of microcontrollers.},
+	language = {en},
+	urldate = {2019-01-14},
+	booktitle = {Proceedings of the {Real} {World} {Domain} {Specific} {Languages} {Workshop} 2018 on   - {RWDSL2018}},
+	publisher = {ACM Press},
+	author = {Koopman, Pieter and Lubbers, Mart and Plasmeijer, Rinus},
+	year = {2018},
+	pages = {1--11},
+	file = {a4-Koopman.pdf:/home/mrl/.local/share/zotero/storage/TXZD529C/a4-Koopman.pdf:application/pdf;Koopman et al. - 2018 - A Task-Based DSL for Microcomputers.pdf:/home/mrl/.local/share/zotero/storage/9ETMTMX2/Koopman et al. - 2018 - A Task-Based DSL for Microcomputers.pdf:application/pdf}
+}
+@InProceedings{GenericProgrammingExtensionForClean,
+	author = "Alimarine, Artem and Plasmeijer, Rinus",
+	editor = "Arts, Thomas and Mohnen, Markus",
+	title="A Generic Programming Extension for Clean",
+	booktitle="Implementation of Functional Languages",
+	year="2002",
+	publisher="Springer Berlin Heidelberg",
+	address="Berlin, Heidelberg",
+	pages="168--185",
+	abstract="Generic programming enables the programmer to define functions by induction on the structure of types. Defined once, such a generic function can be used to generate a specialized function for any user defined data type. Several ways to support generic programming in functional languages have been proposed, each with its own pros and cons. In this paper we describe a combination of two existing approaches, which has the advantages of both of them. In our approach overloaded functions with class variables of an arbitrary kind can be defined generically. A single generic definition defines a kind-indexed family of overloaded functions, one for each kind. For instance, the generic mapping function generates an overloaded mapping function for each kind.",
+	isbn="978-3-540-46028-2"
+}
+@inproceedings{HinzeGenericFunctionalProgramming,
+	author = {Hinze, Ralf},
+	title = {A New Approach to Generic Functional Programming},
+	year = {2000},
+	isbn = {1581131259},
+	publisher = {ACM},
+	address = {New York, NY, USA},
+	doi = {10.1145/325694.325709},
+	abstract = {This paper describes a new approach to generic functional programming, which allows us to define functions generically for all datatypes expressible in Haskell. A generic function is one that is defined by induction on the structure of types. Typical examples include pretty printers, parsers, and comparison functions. The advanced type system of Haskell presents a real challenge: datatypes may be parameterized not only by types but also by type constructors, type definitions may involve mutual recursion, and recursive calls of type constructors can be arbitrarily nested. We show that—despite this complexity—a generic function is uniquely defined by giving cases for primitive types and type constructors (such as disjoint unions and cartesian products). Given this information a generic function can be specialized to arbitrary Haskell datatypes. The key idea of the approach is to model types by terms of the simply typed λ-calculus augmented by a family of recursion operators. While conceptually simple, our approach places high demands on the type system: it requires polymorphic recursion, rank-n types, and a strong form of type constructor polymorphism. Finally, we point out connections to Haskell's class system and show that our approach generalizes type classes in some respects.},
+	booktitle = {Proceedings of the 27th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+	pages = {119–132},
+	numpages = {14},
+	location = {Boston, MA, USA},
+	series = {POPL '00}
+}
+@article{TrattDSL,
+author = {Tratt, Laurence},
+title = {Domain Specific Language Implementation via Compile-Time Meta-Programming},
+year = {2008},
+issue_date = {October 2008},
+publisher = {ACM},
+address = {New York, NY, USA},
+volume = {30},
+number = {6},
+issn = {0164-0925},
+doi = {10.1145/1391956.1391958},
+abstract = {Domain specific languages (DSLs) are mini-languages that are increasingly seen as being a valuable tool for software developers and non-developers alike. DSLs must currently be created in an ad-hoc fashion, often leading to high development costs and implementations of variable quality. In this article, I show how expressive DSLs can be hygienically embedded in the Converge programming language using its compile-time meta-programming facility, the concept of DSL blocks, and specialised error reporting techniques. By making use of pre-existing facilities, and following a simple methodology, DSL implementation costs can be significantly reduced whilst leading to higher quality DSL implementations.},
+journal = {ACM Trans. Program. Lang. Syst.},
+month = {oct},
+articleno = {31},
+numpages = {40},
+keywords = {domain specific languages, Syntax extension, compile-time meta-programming}
+}
+@article{NIZETIC2020122877,
+title = {Internet of Things (IoT): Opportunities, issues and challenges towards a smart and sustainable future},
+journal = {Journal of Cleaner Production},
+volume = {274},
+pages = {122877},
+year = {2020},
+issn = {0959-6526},
+doi = {https://doi.org/10.1016/j.jclepro.2020.122877},
+author = {Sandro Nižetić and Petar Šolić and Diego {López-de-Ipiña González-de-Artaza} and Luigi Patrono},
+keywords = {IoT, Smart city, Sustainability, Energy, Environment, SpliTech2020},
+abstract = {The rapid development and implementation of smart and IoT (Internet of Things) based technologies have allowed for various possibilities in technological advancements for different aspects of life. The main goal of IoT technologies is to simplify processes in different fields, to ensure a better efficiency of systems (technologies or specific processes) and finally to improve life quality. Sustainability has become a key issue for population where the dynamic development of IoT technologies is bringing different useful benefits, but this fast development must be carefully monitored and evaluated from an environmental point of view to limit the presence of harmful impacts and ensure the smart utilization of limited global resources. Significant research efforts are needed in the previous sense to carefully investigate the pros and cons of IoT technologies. This review editorial is partially directed on the research contributions presented at the 4th International Conference on Smart and Sustainable Technologies held in Split and Bol, Croatia, in 2019 (SpliTech 2019) as well as on recent findings from literature. The SpliTech2019 conference was a valuable event that successfully linked different engineering professions, industrial experts and finally researchers from academia. The focus of the conference was directed towards key conference tracks such as Smart City, Energy/Environment, e-Health and Engineering Modelling. The research presented and discussed at the SpliTech2019 conference helped to understand the complex and intertwined effects of IoT technologies on societies and their potential effects on sustainability in general. Various application areas of IoT technologies were discussed as well as the progress made. Four main topical areas were discussed in the herein editorial, i.e. latest advancements in the further fields: (i) IoT technologies in Sustainable Energy and Environment, (ii) IoT enabled Smart City, (iii) E-health – Ambient assisted living systems (iv) IoT technologies in Transportation and Low Carbon Products. The main outcomes of the review introductory article contributed to the better understanding of current technological progress in IoT application areas as well as the environmental implications linked with the increased application of IoT products.}
+}
+
+@InProceedings{10.1007/978-3-030-67438-0_2,
+author="Young, David
+and Grebe, Mark
+and Gill, Andy",
+editor="Morales, Jos{\'e} F.
+and Orchard, Dominic",
+title="On Adding Pattern Matching to Haskell-Based Deeply Embedded Domain Specific Languages",
+booktitle="Practical Aspects of Declarative Languages",
+year="2021",
+publisher="Springer International Publishing",
+address="Cham",
+pages="20--36",
+abstract="Capturing control flow is the Achilles heel of Haskell-based deeply embedded domain specific languages. Rather than use the builtin control flow mechanisms, artificial control flow combinators are used instead. However, capturing traditional control flow in a deeply embedded domain specific language would support the writing of programs in a natural style by allowing the programmer to use the constructs that are already builtin to the base language, such as pattern matching and recursion. In this paper, we expand the capabilities of Haskell-based deep embeddings with a compiler extension for reifying conditionals and pattern matching. With this new support, the subset of Haskell that we use for expressing deeply embedded domain specific languages can be cleaner, Haskell-idiomatic, and more declarative in nature.",
+isbn="978-3-030-67438-0"
+}
+
+@Inbook{Kiselyov2012,
+author="Kiselyov, Oleg",
+editor="Gibbons, Jeremy",
+title="Typed Tagless Final Interpreters",
+bookTitle="Generic and Indexed Programming: International Spring School, SSGIP 2010, Oxford, UK, March 22-26, 2010, Revised Lectures",
+year="2012",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="130--174",
+abstract="The so-called `typed tagless final' approach of [6] has collected and polished a number of techniques for representing typed higher-order languages in a typed metalanguage, along with type-preserving interpretation, compilation and partial evaluation. The approach is an alternative to the traditional, or `initial' encoding of an object language as a (generalized) algebraic data type. Both approaches permit multiple interpretations of an expression, to evaluate it, pretty-print, etc. The final encoding represents all and only typed object terms without resorting to generalized algebraic data types, dependent or other fancy types. The final encoding lets us add new language forms and interpretations without breaking the existing terms and interpreters.",
+isbn="978-3-642-32202-0",
+doi="10.1007/978-3-642-32202-0\_3",
+}
+
+@InProceedings{frp_vs_top,
+ author="Stutterheim, Jurri{\"e}n
+ and Achten, Peter
+ and Plasmeijer, Rinus",
+ title="Maintaining Separation of Concerns Through Task Oriented Software Development",
+ booktitle="Trends in Functional Programming",
+ year="2018",
+ volume="10788",
+ pages={19-38},
+ doi="10.1007/978-3-319-89719-6\_2"
+}
+@InProceedings{ElliottHudak97:Fran,
+   title        = {Functional Reactive Animation},
+   author       = "Conal Elliott and Paul Hudak",
+   booktitle    = "Proceedings of the second ACM SIGPLAN international conference on Functional programming",
+   year         = 1997,
+   pages = {263–273},
+   doi = {10.1145/258948.258973}
+}
+@inbook{Hae,
+author="Wang, Sheng
+and Watanabe, Takuo",
+title="Functional Reactive EDSL with Asynchronous Execution for Resource-Constrained Embedded Systems",
+bookTitle="Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing",
+year="2020",
+pages="171-190",
+doi="10.1007/978-3-030-26428-4\_12"
+}
+@inproceedings{dvfs_frp,
+author = {Belwal, Chaitanya and Cheng, Albert M. K. and Ras, J. and Wen, Yuanfeng},
+title = {Variable Voltage Scheduling with the Priority-Based Functional Reactive Programming Language},
+year = {2013},
+doi = {10.1145/2513228.2513271},
+booktitle = {Proceedings of the 2013 Research in Adaptive and Convergent Systems},
+pages = {440–445},
+numpages = {6},
+}
+@book{FreeRTOS,
+      title={Using the FreeRTOS Real Time Kernel - A Practical Guide},
+      author={Barry, Richard},
+      year=2009
+}
+@Article{Mantis,
+author={Bhatti, Shah
+and Carlson, James
+and Dai, Hui
+and Deng, Jing
+and Rose, Jeff
+and Sheth, Anmol
+and Shucker, Brian
+and Gruenwald, Charles
+and Torgerson, Adam
+and Han, Richard},
+title={MANTIS OS: An Embedded Multithreaded Operating System for Wireless Micro Sensor Platforms},
+journal={Mobile Networks and Applications},
+year={2005},
+volume={10},
+number={4},
+pages={563-579},
+doi={10.1007/s11036-005-1567-8}
+}
+@INPROCEEDINGS{Nano_rk,
+  author={Eswaran, A. and Rowe, A. and Rajkumar, R.},
+  booktitle={26th IEEE International Real-Time Systems Symposium}, 
+  title={Nano-RK: an energy-aware resource-centric RTOS for sensor networks}, 
+  year={2005},
+  pages={256-265},
+  doi={10.1109/RTSS.2005.30}
+}
+@inproceedings{10.1145/2633357.2633367,
+author = {Ekblad, Anton and Claessen, Koen},
+title = {A Seamless, Client-Centric Programming Model for Type Safe Web Applications},
+year = {2014},
+isbn = {9781450330411},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2633357.2633367},
+doi = {10.1145/2633357.2633367},
+abstract = {We propose a new programming model for web applications which is (1) seamless; one program and one language is used to produce code for both client and server, (2) client-centric; the programmer takes the viewpoint of the client that runs code on the server rather than the other way around, (3) functional and type-safe, and (4) portable; everything is implemented as a Haskell library that implicitly takes care of all networking code. Our aim is to improve the painful and error-prone experience of today's standard development methods, in which clients and servers are coded in different languages and communicate with each other using ad-hoc protocols. We present the design of our library called Haste.App, an example web application that uses it, and discuss the implementation and the compiler technology on which it depends.},
+booktitle = {Proceedings of the 2014 ACM SIGPLAN Symposium on Haskell},
+pages = {79–89},
+numpages = {11},
+keywords = {network communication, distributed systems, web applications},
+location = {Gothenburg, Sweden},
+series = {Haskell '14}
+}
+
+@inproceedings{Haski,
+author = {Valliappan, Nachiappan and Krook, Robert and Russo, Alejandro and Claessen, Koen},
+title = {Towards Secure IoT Programming in Haskell},
+year = {2020},
+isbn = {9781450380508},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3406088.3409027},
+doi = {10.1145/3406088.3409027},
+abstract = {IoT applications are often developed in programming languages with low-level abstractions, where a seemingly innocent mistake might lead to severe security vulnerabilities. Current IoT development tools make it hard to identify these vulnerabilities as they do not provide end-to-end guarantees about how data flows within and between appliances. In this work we present Haski, an embedded domain specific language in Haskell (eDSL) for secure programming of IoT devices. Haski enables developers to write Haskell programs that generate C code without falling into many of C’s pitfalls. Haski is designed after the synchronous programming language Lustre, and sports a backwards compatible information-flow control extension to restrict how sensitive data is propagated and modified within the application. We present a novel eDSL design which uses recursive monadic bindings and allows a natural use of functions and pattern-matching in Haskell to write Haski programs. To showcase Haski, we implement a simple smart house controller where communication is done via low-energy Bluetooth on Zephyr OS.},
+booktitle = {Proceedings of the 13th ACM SIGPLAN International Symposium on Haskell},
+pages = {136–150},
+numpages = {15},
+keywords = {Information-flow Control, Synchronous programming, IoT, eDSL, Haskell},
+location = {Virtual Event, USA},
+series = {Haskell 2020}
+}
+
+@inproceedings{Haskino,
+  author    = {Mark Grebe and Andy Gill},
+  editor    = {David Van Horn and John Hughes},
+  title     = {Threading the Arduino with Haskell},
+  booktitle = {Trends in Functional Programming - 17th International Conference,
+               {TFP} 2016, College Park, MD, USA, June 8-10, 2016, Revised Selected
+               Papers},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {10447},
+  pages     = {135--154},
+  publisher = {Springer},
+  year      = {2016},
+  doi       = {10.1007/978-3-030-14805-8\_8}
+}
