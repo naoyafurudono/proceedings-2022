@@ -1,0 +1,200 @@
+%format not = "not"
+%format e1 = "e_1"
+%format e2 = "e_2"
+%format e1p = "e_1^\prime"
+%format e2p = "e_2^\prime"
+
+%format eval_0 = "eval_0"
+%format Eval_0 = "Eval_0"
+%format Expr_0 = "Expr_0"
+%format Lit_0 = "Lit_0"
+%format Add_0 = "Add_0"
+%format Sub_0 = "Sub_0"
+%format Print_0 = "Print_0"
+%format print_0 = "print_0"
+
+%format Sem_s = "Sem_s"
+%format lit_s = "lit_s"
+%format add_s = "add_s"
+%format sub_s = "sub_s"
+
+%format Expr_t = "Expr_t"
+%format Eval_t = "Eval_t"
+%format E_t = "E_t"
+%format Printer_t = "Printer_t"
+%format P_t = "P_t"
+%format lit_t = "lit_t"
+%format add_t = "add_t"
+%format Sub_t = "Sub_t"
+%format sub_t = "sub_t"
+
+%format eval_1 = "eval_1"
+%format Eval_1 = "Eval_1"
+%format Expr_1 = "Expr_1"
+%format Lit_1 = "Lit_1"
+%format Add_1 = "Add_1"
+%format Sub_1 = "Sub_1"
+%format Print_1 = "Print_1"
+%format print_1 = "print_1"
+
+%format eval_2 = "eval_2"
+%format Eval_2 = "Eval_2"
+%format Expr_2 = "Expr_2"
+%format Lit_2 = "Lit_2"
+%format Add_2 = "Add_2"
+%format Sub_2 = "Sub_2"
+%format sub_2 = "sub_2"
+%format Ext_2 = "Ext_2"
+%format Print_2 = "Print_2"
+%format print_2 = "print_2"
+%format Semantics_2 = "Semantics_2"
+
+%format eval_3 = "eval_3"
+%format Eval_3 = "Eval_3"
+%format Print_3 = "Print_3"
+%format print_3 = "print_3"
+%format opt_3 = "opt_3"
+%format Opt_3 = "Opt_3"
+%format HasEval_3 = "HasEval_3"
+%format getEval_3 = "getEval_3"
+%format EvalDict_3 = "EvalDict_3"
+%format HasPrint_3 = "HasPrint_3"
+%format getPrint_3 = "getPrint_3"
+%format PrintDict_3 = "PrintDict_3"
+%format HasOpt_3 = "HasOpt_3"
+%format getOpt_3 = "getOpt_3"
+%format OptDict_3 = "OptDict_3"
+%format Expr_3 = "Expr_3"
+%format Lit_3 = "Lit_3"
+%format Add_3 = "Add_3"
+%format Sub_3 = "Sub_3"
+%format sub_3 = "sub_3"
+%format Ext_3 = "Ext_3"
+
+%format eval_4 = "eval_4"
+%format Eval_4 = "Eval_4"
+%format Print_4 = "Print_4"
+%format print_4 = "print_4"
+%format opt_4 = "opt_4"
+%format Opt_4 = "Opt_4"
+%format HasEval_4 = "HasEval_4"
+%format getEval_4 = "getEval_4"
+%format EvalDict_4 = "EvalDict_4"
+%format HasPrint_4 = "HasPrint_4"
+%format getPrint_4 = "getPrint_4"
+%format PrintDict_4 = "PrintDict_4"
+%format HasOpt_4 = "HasOpt_4"
+%format getOpt_4 = "getOpt_4"
+%format OptDict_4 = "OptDict_4"
+%format OptPrintDict_4 = "OptPrintDict_4"
+%format OPD_4 = "OPD_4"
+%format Expr_4 = "Expr_4"
+%format Lit_4 = "Lit_4"
+%format Add_4 = "Add_4"
+%format Sub_4 = "Sub_4"
+%format SubLoop_4 = "SubLoop_4"
+%format sub_4 = "sub_4"
+%format Neg_4 = "Neg_4"
+%format NegLoop_4 = "NegLoop_4"
+%format neg_4 = "neg_4"
+%format Ext_4 = "Ext_4"
+
+%format eval_g = "eval_g"
+%format Eval_g = "Eval_g"
+%format Print_g = "Print_g"
+%format print_g = "print_g"
+%format opt_g = "opt_g"
+%format Opt_g = "Opt_g"
+%format HasEval_g = "HasEval_g"
+%format getEval_g = "getEval_g"
+%format EvalDict_g = "EvalDict_g"
+%format HasPrint_g = "HasPrint_g"
+%format getPrint_g = "getPrint_g"
+%format PrintDict_g = "PrintDict_g"
+%format HasOpt_g = "HasOpt_g"
+%format getOpt_g = "getOpt_g"
+%format OptDict_g = "OptDict_g"
+%format OptPrintDict_g = "OptPrintDict_g"
+%format OPD_g = "OPD_g"
+%format Expr_g = "Expr_g"
+%format Lit_g = "Lit_g"
+%format Add_g = "Add_g"
+%format Sub_g = "Sub_g"
+%format SubLoop_g = "SubLoop_g"
+%format sub_g = "sub_g"
+%format Neg_g = "Neg_g"
+%format NegLoop_g = "NegLoop_g"
+%format neg_g = "neg_g"
+%format NotLoop_g = "NotLoop_g"
+%format Not_g = "Not_g"
+%format not_g = "not_g"
+%format EqLoop_g = "EqLoop_g"
+%format Eq_g = "Eq_g"
+%format eq_g = "eq_g"
+%format Ext_g = "Ext_g"
+
+%if False
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% forall.fmt
+%
+% *EXPERIMENTAL*
+% Semi-automatic formatting of the . as either function
+% composition (normally) or a period (when used after a
+% forall).
+%
+% Permission is granted to include this file (or parts of this file) 
+% literally into other documents, regardless of the conditions or 
+% license applying to these documents.
+%
+% Andres Loeh, November 2005, ver 1.1
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%endif
+%if not lhs2tex_forall_fmt_read
+%let lhs2tex_forall_fmt_read = True
+%include lhs2TeX.fmt
+%
+%if style /= newcode
+%
+% First, let's redefine the forall, and the dot.
+%
+%format forall(x) = forall_ x "\hsforall "
+%format .         = "\hsdot{" `comp_` "}{" period_ "}"
+%format `comp_`   = "\circ "
+%format period_   = "."
+%format forall_   = "{\bf forall\ }"
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@@addto@@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+%endif
+%endif
