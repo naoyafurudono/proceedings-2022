@@ -1,0 +1,249 @@
+\section[sec:tophat]{The TopHat language}
+
+\TOPHAT\ is a formal language for reasoning about task-oriented programs.
+It is described by a layered operational semantics, consisting of multiple big-step semantic functions for reducing expressions, and two labelled transition systems for handling user inputs.
+Its main semantics are \emph{evaluation}, \emph{fixation}, and \emph{interaction}.
+To make clear which features come from \TOP\ and which features come from functional programming, \TOPHAT\ is separated into a task language and an underlying host language \cite[conf/ppdp/SteenvoordenNK19,Steenvoorden22].
+
+The host language of \TOPHAT\ is a simply typed $\lambda$-calculus,
+extended with with basic types $\beta$, references $h$, and the task type constructor $\Task$.
+Basic types are the unit type; primitive types for booleans, integers, and strings; and pairs of other basic types.
+% Additionally, there are basic types $\beta$, which contain only a subset of all types $\tau$.
+%
+We will present the main components of the task language, which is embedded into the host language, in the next subsections.
+% Finally, \see[sec:tophat-examples] will discuss some larger examples.
+
+
+\subsection{Editors}
+
+An editor is a task holding a value.
+Editors allow end users to interact with the system by entering and changing information.
+When a user sends an input event to an editor, the editor will update its current value to reflect the change.
+There are no output events.
+Instead, the current value of an editor can be observed and used in subsequent tasks.
+All editors and input events are \emph{keyed} by a unique key $k$.
+This is to identify which editor needs to handle which user input.
+There are three types of editors in \TOPHAT:
+
+\startitemize
+  \item
+    \emph{Empty editors} or \emph{unvalued editors} ($\Enter^k \beta$) are editors that currently hold no value.
+    They can be seen as an input prompt to the user to enter data.
+    Empty editors are annotated with a basic type $\beta$, which means that only basic values of type $\beta$ are accepted by the editor.
+    Once an empty editor receives a valid input event, it becomes a filled editor containing the new data.
+
+  \item
+    \emph{Filled editors} or \emph{valued editors} ($\Update^k b$) are editors that currently hold the basic value~$b$.
+    Filled editors can be seen as either outputting a value, or as an input prompt that comes with a default value.
+    They can never be cleared, only updated with new values of the same type.
+
+  \item
+    \emph{Shared editors} ($\Change^k h$) watch heap locations $h$.
+    They allow the user to view and change shared values.
+    Whenever a shared editor is updated, all shared editors watching the same heap location $h$ will be updated as well.
+    To create a heap location to an expression $e$, we write $\Share e$.
+    Reference assignment ($e_1 \Assign e_2$) allows the system to assign a new value to a heap location.
+\stopitemize
+
+% \input{sections/fig-editors}
+
+Filled editors and shared editors both have read-only variants ($\View^k b$, $\Watch^ h$).
+End users can see the value in a read-only editor, but not change it.
+As editors can only handle basic values of type $\beta$,
+there is also a lift combinator ($\Lift v$) which lifts any value $v$ into the task world.
+
+% The relation between the different editors is illustrated in the state diagram in Figure \ref{fig:editor-states}.
+% Since editors are already fully reduced, no normalisation needs to be done.
+% Figure \ref{fig:n-editors} gives the normalisation rules for editors.
+
+
+% \subsection{Combinators}
+\subsection{Sequential composition}
+
+The step combinator ($\Step$) allows the result from one task to determine the next task.
+We call this \textit{sequential composition}.
+The step combinator expects a task $t$ of type $\Task\ \tau_1$ on the left hand side,
+and a continuation $e$ on the right hand side, which is a function from from $\tau_1$ to a successor task of type $\Task\ \tau_2$.
+Steps are guarded.
+A step can only be taken if two conditions are met: (1) the task on the left-hand side has an observable value;
+and (2) the evaluation of the continuation on the right-hand side with this value does not fail.
+A failing task ($\Fail$) stands for an impossible task.
+A task that is failing never has a value and never accepts input.
+% The normalisation rules for step are given in Figure \ref{fig:n-step}.
+% There are three cases: either the first condition fails, and the step remains guarded (\textsc{N-StepNone}); or the first condition is met, but the second condition fails, and the step remains guarded (\textsc{N-StepFail}); or both conditions are met, and the step can proceed (\textsc{N-StepCont}).
+% Note that the last two rules use evaluation in the host language to compute the successor task.
+% The result of this evaluation is only used when the step can be taken successfully (\textsc{N-StepCont}), and discarded otherwise (\textsc{N-StepFail}). \\
+
+\startexample[exm:coffee-machine]{Coffee machine}
+  Consider the following task-program:
+  \begin{TASK}
+    let coffeeMachine : Task Drink = enter Int >>= \x.
+      if x == 1 then lift Coffee else if x == 2 then lift Tea else fail
+  \end{TASK}
+  \noindent
+  This program describes a coffee machine that can either serve coffee or tea.
+  Coffee is served when one coin is inserted, and tea is served when two coins are inserted.
+  For any other number of coins, the step remains guarded by the failing task ($\Fail$).
+  This means that the coffee machine returns nothing and waits until a correct number of coins is inserted.
+\stopexample
+
+The transform combinator ($\Trans$) maps a function over a task.
+It takes a function of type $\tau_1 \to \tau_2$ on the left-hand side,
+and a task of type $\Task\ \tau_1$ on the right-hand side, resulting in a task of type $\Task\ \tau_2$.
+% The normalisation rule of the transform combinator, given in Figure \ref{fig:n-trans}, does not actually do anything.
+If we want to apply the function and use the result, we would need to use the transform combinator in combination with the step combinator,
+as we can see in the example below.
+% This would allow us to extract the value of the transform task by using the task observation $\Value$, which in case of the transform combinator, is defined as $\Value(e \Trans t) = v'$ when $\Value(t,\sigma) = v$ and $ev \eval v'$.
+% So, if the task on the right-hand side has a value $v$, and applying the function $e$ to $v$ results in the value $v'$, then the transform combinator has the value $v'$.
+
+\startexample{Traffic light}
+  Let us consider a simple example:
+  \begin{TASK}
+    let trafficLight : Task Light =
+      ((\x. if x then Green else Red) <*> enter Bool) >>= \y. view y
+  \end{TASK}
+  This program describes a traffic light whose light is initially turned off, but given the right input, it can either become red or green.
+  So long as no input is given, the transform task on the left-hand side of the step combinator has no value, and the step remains guarded.
+  Once an input is entered, transform returns the value \ctr{Green} if $\True$ was entered, and \ctr{Red} if $\False$ was entered, upon which the step proceeds and displays the result.
+  % Now that the left-hand side of step has a value, it proceeds and displays the value.
+  % upon which the step can proceed.
+  % Once either $\True$ or $\False$ is entered, the transform task gets the value $\Green$ or $\Red$
+\stopexample
+
+
+\subsection{Parallel composition}
+
+Pairing ($\Pair$) combines the result of two tasks, but only if both branches have a value.
+If the left task is of type $\Task\ \tau_1$, and the right task is of type $\Task\ \tau_2$, then their pairing is of type $\Task\ (\tau_1 \times \tau_2)$.
+However, if one or both branches have no value, then the resulting task also has no value.
+
+Choosing ($\Choose$) chooses one of two branches.
+Therefore, both branches should be of the same type $\Task\ \tau$.
+This combinator is left-biased: it returns the leftmost task that has a value.
+If neither task has a value, then the resulting task also has no value.
+% The normalisation rules for pairing and choice are given in Figure \ref{fig:n-parallel}.
+See also \see[fig:observation-value] for the definition of the value observation for pairing and choice.
+
+These combinators allow user to work on two tasks in parallel, but unlike the name suggests, parallel does not mean that there is non-determinism.
+The order of execution is determined by the order of user inputs send.
+Instead, parallel here means that the order in which we execute the tasks, and their subtasks, does not matter.
+
+\startexample{Breakfast}
+  Let us consider the following task, which makes use of both parallel combinators:
+  \begin{TASK}
+    let make : $\tau$ -> Task $\tau$ = \x. enter Unit >>= \y. view x in
+    let makeBreakfast : Task (Drink * Food) =
+      ((make Tea <|> make Coffee) <&> make Egg) >>= eatBreakfast
+  \end{TASK}
+  This program describes a simple workflow for making breakfast.
+  Breakfast consists of something to drink (tea or coffee), and something to eat (eggs).
+  The drink and the food are prepared in parallel ($\Pair$), which means that the order in which they are made does not matter.
+  For the drink, users have a choice ($\Choose$) whether they want tea or coffee with their breakfast.
+  For the food, users will always make an egg.
+  We will use the function \var{make} to simulate that the user must first perform an action (i.e. send user input) before an item is prepared and the task has a value.
+  Only when both the drink and food are ready, can the step be taken and can we enjoy our breakfast.
+\stopexample
+
+
+\subsection[sec:observations]{Observations}
+
+Not just $\Fail$ can fail, tasks with failing subtasks can also fail.
+For example, the pairing $\Fail \Pair \Fail$ is also a failing task.
+It is equivalent to $\Fail$.
+To capture what tasks are failing we introduce the failing observation $\Failing$, which is defined in \see[fig:observation-failing-inputs].
+Failing is especially useful when used in combination with the step combinator,
+as we have seen in \see[exm:coffee-machine].
+Note that if only one side fails in a pairing,
+for example with $\Fail \Pair t$ for $t$ a non-failing task,
+then $\Fail \Pair t$ can still interact with end users if $t$ can.
+Therefore the pairing should not fail if only one side fails.
+
+% \placefigure[][fig:o-failing]
+%   {Failing observation on tasks}
+%   {\usemacro{O-Failing}}
+
+\placefigure[][fig:observation-failing-inputs]
+  {Failing and inputs observations on tasks}
+  {\sidebyside[0.45][0.55]
+    {\usemacro{O-Failing}\vspace*{\fill}}
+    {\usemacro{O-Inputs}}}
+
+
+% \subsection{Input}
+
+Once a \TOPHAT\ program is normalised, it is possible to send input to it.
+The input event $k!b$ indicates that the input $b$ should be entered into the editor with key $k$.
+To do this, it is useful to know what inputs a given task accepts.
+The observation function $\Inputs$ returns the set of input events that are currently possible for a given task.
+We consider an input event $\iota$ a \emph{valid} input event for the task $t$ iff $\iota \in \Inputs(t)$.
+Its definition is given in \see[fig:observation-failing-inputs].
+For the three read-write editors, $\Inputs$ returns all input events $k!b$ where $b$ is of the correct type.
+For task combinators, $\Inputs$ is defined recursively.
+For all other tasks, $\Inputs$ returns the empty set.
+$\Inputs$ is only defined on \emph{normalised tasks},
+as those tasks are ready to receive user input.
+We'll discuss this in more detail in the next section.
+
+% \placefigure[][fig:o-inputs]
+%   {Inputs observation on tasks}
+%   {\usemacro{O-Inputs}}
+
+To be able to normalise tasks, we need to have a way to determine the value of tasks.
+For this, we introduce the task observation $\Value$.
+Given a task $t : \Task\ \tau$ and its current state $\sigma$, this function returns the task's value $v$ of type $\tau$.
+It is also possible that a task's value is undefined, in which case we write $\Value(t,\sigma) = \bot$.
+The definition of $\Value$ is given in \see[fig:observation-value].
+
+\placefigure[][fig:observation-value]
+  {Value observation on tasks}
+  % {\usemacro{O-Value}}
+  {\sidebyside[0.3][0.7]
+    {\usemacro{O-Value-A}}
+    {\usemacro{O-Value-B}}}
+
+
+\subsection{Semantics}
+
+\see[fig:semantic-functions] shows all semantic relations as used by \TOPHAT s formalisation of tasks
+together with the task observations.
+They fit into three layers: the \emph{host layer}, the \emph{internal layer}, and the \emph{external layer}.
+Next, we will discuss all semantic arrows starting from the bottom layer.
+
+\input{sections/fig-semantics}
+
+Evaluating terms in the host language to values is handled by the big-step \emph{evaluation} semantics,
+where a value is an expression in the host language that cannot be reduced further.
+Values $v$ can be lambda functions, pairs of values, unit, constants, locations, or tasks.
+Basic values $b$ are a subset of values $v$ that are of basic type $\beta$.
+We denote the evaluation of expression $e$ to the value $v$ by $e \evaluate v$.
+
+After evaluation is done, a task is ready to be \emph{normalised}.
+Normalisation is a big-step semantics that is responsible for reducing tasks until they are ready to accept input.
+We write $t, \sigma \normalise t', \sigma', \delta'$ to denote the normalisation of task $t$ in state $\sigma$ to task t' in state $\sigma'$.
+The state $\sigma$ is a mapping from heap locations to basic values.
+It keeps track of all references created so far, and what value they currently hold.
+Additionally, normalisation returns a set $\delta'$, which we will call a \emph{dirty set},
+containing all heap locations whose value has been changed while normalisation took place.
+It will be used in the \emph{fixation} semantics, which is defined on top of normalisation.
+Due to mutable references, the fixation semantics is required to make sure that a task is fully normalised before any user interaction is allowed.
+Fixation makes use of normalisation as a helper semantics.
+We write $t, \sigma, \delta \fixate t', \sigma'$ to denote the fixation of task $t$ in state $\sigma$ given the dirty set $\delta$, to task $t'$ in state $\sigma'$.
+
+Input events are handled by the handling and interaction semantics.
+Both semantics are small-step semantics that take an user input $\iota$ for each step.
+For the \emph{handling} semantics, we write $t,\sigma \handle{\iota} t',\sigma',\delta'$
+to denote that handling the user input $\iota$ in task $t$ and state $\sigma$ results in task $t'$ and state $\sigma'$.
+Similar to the normalisation semantics, the handling semantics also returns a dirty set $\delta'$.
+The \emph{interaction} semantics then makes use the helper handling semantics,
+and the previously mentioned fixation semantics to make sure that, after user interaction,
+a task is fully reduced and ready to accept the next input.
+For the interaction semantics, we write $t,\sigma \interact{\iota} t',\sigma'$ to denote that task $t$ in state $\sigma$ transitions to task $t'$ in state $\sigma'$ after the user input $\iota$.
+For further details we refer to \cite[Steenvoorden22].
+
+% %, whose rules are given in the appendix.
+% Most handling rules simply pass along the input events to their subtasks.
+% The only interesting rules are the handling rules for editors.
+% A valid input event to an empty editor results in a filled editor containing the new data (\seerule{H-Enter}),
+% a valid input event to a filled editor updates its value (\seerule{H-Update}),
+% and a valid input event to a shared editor updates the state $\sigma$ such that the heap location $h$ now contains the new value (\seerule{H-Change}).
+% It also returns $\delta = \set{h}$, which will later be used in the fixation semantics described in Section~\ref{sec:references}.

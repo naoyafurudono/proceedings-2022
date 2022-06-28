@@ -1,0 +1,127 @@
+% !TEX root=../main.tex
+
+
+%% Symbols %%
+
+\newbinary{Rhd}           {\blacktriangleright}
+\newbinary{Lhd}           {\blacktriangleleft}
+\newbinary{blackmoustache}{\Rhd\mkern-8mu\Lhd}
+\renewbinary{blacklozenge}{\Lhd\mkern-4mu\Rhd}
+\newbinary{boxcirc}       {\square\mkern-10.33mu\circ\mkern+2mu} %\kern-1.25ex\whitebox} %{\ocircle} %{\boxcircle} %{\overline{\whitebox}}
+\newbinary{boxpluscirc}   {\boxplus\mkern-10.33mu\circ\mkern+2mu} %{\oplus} %{\dot{\boxplus}} %{\boxbox} %{\overline{\boxplus}}]
+
+\newrelation{colonequals} {:=}
+
+\newmathcommand{exprequiv}{\simeq}
+\newmathcommand{nexprequiv}{\not\simeq}
+\newmathcommand{taskequiv}{\cong}
+\newmathcommand{ntaskequiv}{\not\cong}
+
+\newmathcommand{mapsdown}[rel]
+  {\rotatebox[origin=c]{-90}{\ensuremath{\mapsto}}}
+
+
+%% Arrows %%
+
+\newrelation{too} {\longrightarrow}
+\newrelation{down}{\downarrow}
+\newrelation{Down}{\Downarrow}
+\newrelation{Too} {\Longrightarrow}
+
+
+%% Keywords %%
+
+\newkeyword[If]{if}
+\newkeyword[Then]{then}
+\newkeyword[Else]{else}
+
+\newmacro{Ite}[3]{
+  \If #1 \Then #2 \Else #3
+}
+
+\newkeyword[Assert]{assert\:}
+\newkeyword[Share]{share\:}
+
+
+%% Values %%
+
+\newvalue[True]  {True}
+\newvalue[False] {False}
+\newvalue[Not]   {not}
+
+\newvalue[Id]    {id}
+\newvalue[Assoc] {assoc}
+
+\newvalue[unit]{\record{}}
+
+
+%% Types %%
+
+\newtype{Bool}
+\newtype{Int}
+\newtype{String}
+\newtype{List}
+\newtype{Task}
+
+
+%% Operators %%
+
+\newunary {Enter}    {\square}
+\newunary {Update}   {\boxminus}
+\newunary {View}     {\boxcirc}
+
+\newbinary{Pair}     {\blackmoustache}
+\newunary {Lift}     {\blacksquare}
+\newbinary{Choose}   {\blacklozenge}
+\newunary {Fail}     {\lightning}
+
+\newbinary{Trans}    {\bullet}
+\newbinary{Step}     {\Rhd}
+
+\newbinary{Assign}   {\colonequals}
+\newunary {Change}   {\boxplus}
+\newunary {Watch}    {\boxpluscirc}
+
+\newbinary{Modify}   {::=}
+\newbinary{Gets}     {\Lhd}
+\newbinary{Gots}     {\lhd}
+\newbinary{Select}   {\rhd}
+\newbinary{Stop}     {\Select}
+\newunary {Pick}     {\diamond}
+\newunary {Branch}   {\blackdiamond}
+\newunary {Repeat}   {\backcicle}
+\newunary {Forever}  {\counterclockwise}
+
+
+%% Observations %%
+
+\newunary {Value}    {\mathcal{V}}
+\newunary {Inputs}   {\mathcal{I}}
+\newunary {Rendering}{\mathcal{R}}
+\newunary {Failing}  {\mathcal{F}}
+\newunary {Watching} {\mathcal{W}}
+\newunary {Options}  {\mathcal{O}}
+\newunary {Labels}   {\mathcal{L}}
+\newunary {Sat}      {\mathcal{S}}
+\newunary {Hints}    {\mathcal{H}}
+\newunary {Node}     {\mathcal{N}}
+
+
+%% Semantics %%
+
+\newrelation{evaluate}  {\mapsdown}
+\newrelation{normalise} {\down}
+\newrelation{fixate}    {\Down}
+
+\newmacro{handle}[1]    {\overset{#1}{\too}}
+\newmacro{interact}[1]  {\overset{#1}{\Too}}
+\newmacro{execute}[1]   {\mathrel{\overset{#1}{\Too}\nobreak\strut\mkern-6mu^*}}
+
+
+%% Helpers %%
+
+\newmacro{var}{\textsf}
+\newmacro{ctr}{\textsf}
+\newmacro{cnd}{\textit}
+\newmacro{impl}{\texttt}
+\newmacro{seerule}{\textsc}
