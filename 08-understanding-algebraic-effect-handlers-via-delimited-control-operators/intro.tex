@@ -1,0 +1,70 @@
+\section{Introduction}
+\label{sec:intro}
+
+Algebraic effects~\cite{plotkin-effect} and handlers~\cite{plotkin-handler}
+have become an essential element of a programmer's toolbox.
+Effect handlers provide a convenient interface for defining and composing
+effects.
+They also enable concise implementation of sophisticated behavior by giving
+the programmer access to continuations.
+
+Over the past decade, researchers have been actively studying the theory
+of effect handlers.
+As an outcome of these studies, we have obtained various program
+transformations for effect handlers, which can be used to compile effect
+handlers into plain
+$\lambda$-terms~\cite{hillerstrom-cps,schuster-capability,xie-evidently}.
+There are also a variety of type systems for effect handlers, in which
+effects are represented as sets~\cite{bauer-effsys},
+rows~\cite{hillerstrom-links}, or
+capabilities~\cite{brachthauser-lightweight}.
+
+We continue the study of effect handlers, but from a different point of view.
+Instead of directly developing the theory of effect handlers, we
+\textit{derive} it from the theory of delimited control
+operators~\cite{danvy-abstracting,kameyama-dynamic,materzok-subtyping,dyvbig-monadic}.
+Control operators have a longer history than effect handlers, and their
+theory is closely connected to that of effect handlers~\cite{forster-jfp,pirog-typedeq}.
+We aim to improve the understanding of effect handlers by exploiting the 
+existing results about control operators, as well as the connection between 
+effect handlers and control operators.
+
+In this paper, we discuss a variant of control operators known as \shiftztt
+and dollar~\cite{materzok-hierarchy}, and a variant of effect handlers that
+are called \textit{deep} handlers~\cite{kammar-handler}.
+Our goal is to answer the following research questions.
+
+\begin{itemize}
+\item The dollar operator extends the more traditional \resetztt operator
+  with a return clause, and this extension is known to cause no change in
+  the expressiveness~\cite{materzok-hierarchy}.
+  Does this result also apply to effect handlers with and without a return 
+  clause?
+
+\item The \shiftztt and dollar operators are associated with a CPS
+  translation that can be viewed as a definitional interpreter.
+  What CPS translation can we derive for deep effect handlers from the CPS
+  translation for \shiftztt and dollar?
+
+\item The typing of \shiftztt and dollar is directed by their CPS
+  translation~\cite{danvy-context,kameyama-dynamic,materzok-subtyping},
+  rather than their direct-style form.
+  What type system can we derive for deep effect handlers using the CPS
+  approach?
+\end{itemize}
+
+Note that we do not intend to produce results that are particularly 
+surprising, nor do we aim to develop something that has immediate 
+practical use.
+Instead, we would like to explore the possibility of transferring 
+knowledge between different control facilities.
+This method can be applied for various purposes, and we feel that it is 
+especially effective when used in a pedagogical context.
+
+In the rest of this paper, we first define a calculus of \shiftztt/dollar
+(Section~\ref{sec:lambdasz}) and another calculus of deep effect handlers
+(Section~\ref{sec:lambdah}).
+We next answer the three questions one by one (Sections~\ref{sec:return} to
+\ref{sec:type2}).
+We then discuss related work (Section~\ref{sec:related}) and conclude
+with future perspectives (Section~\ref{sec:conclusion}).
