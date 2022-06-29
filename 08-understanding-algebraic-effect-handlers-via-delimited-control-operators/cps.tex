@@ -1,0 +1,329 @@
+\newcommand{\LambdaszCPS}{
+\begin{figure}[t]
+
+\begin{align*}
+\cpsv{x} &= x \\
+\cpsv{\abs{x}{M}} &= \abs{x}{\cps{M}} \\
+\cps{\ret{V}} &= \abs{k}{\app{k}{\cpsv{V}}} \\
+\cps{\app{V}{W}} &= \app{\cpsv{V}}{\cpsv{W}} \\
+\cps{\letin{x}{M}{N}} &= \abs{k}{\app{\cps{M}}{(\abs{x}{\app{\cps{N}}{k}})}} \\
+\cps{\shiftz{k}{M}} &= \abs{k}{\cps{M}} \\
+\cps{\dollarret{M}{x}{N}} &= \app{\cps{M}}{(\abs{x}{\cps{N}})}
+\end{align*}
+
+\caption{CPS Translation of \lambdasz~\cite{hillerstrom-cps,materzok-subtyping}}
+\label{fig:lambdaszcps}
+\end{figure}
+}
+
+\newcommand{\LambdahCPS}{
+\begin{figure}[t]
+
+\begin{align*}
+\cps{\doop{V}} &=
+  \abs{k}{\abs{h}{\apptwo{h}{\cpsv{V}}{(\abs{x}{\apptwo{k}{x}{h}})}}} \\
+\cps{\handle{M}{x}{M_r}{x}{k}{M_h}} &=
+  \apptwo{\cps{M}}{(\abstwo{x}{h}{\cps{M_r}})}{(\abstwo{x}{k}{\cps{M_h}})}
+\end{align*}
+
+\caption{CPS Translation of \lambdah~\cite{hillerstrom-cps}
+(cases for $\lambda$-terms are the same as Figure~\ref{fig:lambdaszcps})}
+\label{fig:lambdahcps}
+\end{figure}
+}
+
+\newcommand{\Macro}{
+\begin{figure}[t]
+
+\begin{align*}
+\macro{\doop{V}} &=
+  \shiftz{k}
+         {\ret{(\abs{h}
+                    {\letnoin{v_1}{\app{h}{\macro{V}}}}}} \\
+& \hspace{2.88cm}    \intt \ v_1 \ 
+                             (\abs{x}
+                                  {\letnoin{v_2}{\app{k}{x}}} \\
+& \hspace{4.45cm}                   \intt \ \app{v_2}{h})) \\
+\macro{\handle{M}{x}{M_r}{x}{k}{M_h}} &=
+  \letnoin{v}{\dollarret{\macro{M}}{x}{\ret{\abs{h}{\macro{M_r}}}}} \\
+& \hspace{4.25mm} \intt \ \app{v}{(\abs{x}{\ret{(\abs{k}{\macro{M_h}})}})}
+\end{align*}
+
+\caption{Macro Translation from \lambdah to \lambdasz}
+\label{fig:macro}
+\end{figure}
+}
+
+\newcommand{\SMacro}{
+\begin{figure}[t]
+
+\begin{align*}
+\macro{\doop{V}} &=
+  \shiftz{k}
+         {(\abs{h}
+               {\apptwo{h}{\macro{V}}{(\abs{x}{\apptwo{k}{x}{h}})}})} \\
+\macro{\handle{M}{x}{M_r}{x}{k}{M_h}} &=
+  \app{\dollarret{\macro{M}}{x}{\abs{h}{\macro{M_r}}}}
+      {(\abstwo{x}{k}{\macro{M_h}})}
+\end{align*}
+
+\caption{Simpler Macro Translation from \lambdah to \lambdasz~\cite{forster-jfp}}
+\label{fig:smacro}
+\end{figure}
+}
+
+\section{Deriving a CPS Translation}
+\label{sec:cps}
+
+The classical way of specifying the semantics of control operators is to
+give a translation into continuation-passing style (CPS)~\cite{plotkin-cps},
+which converts control operators into plain lambda terms.
+In the case of \shiftztt and dollar (or reset), there exist several variants
+of CPS translation, differing in the representation of
+continuations~\cite{biernacki-toplas,dyvbig-monadic,shan-simulation,materzok-subtyping,materzok-hierarchy}.
+
+Compared to control operators, the semantics of effect handlers seems to
+be less tightly tied to the CPS translation.
+In fact, the CPS translation of effect handlers has not been formally
+studied until recently~\cite{hillerstrom-cps,hillerstrom-jfp}.
+This gives rise to a question: What would we obtain if we derive the CPS
+translation of effect handlers from that of control operators, which is
+considered definitional?
+
+In this section, we derive the CPS translation of effect handlers by
+composing the following translations.
+
+\begin{enumerate}
+\item The macro translation from effect handlers to
+  \shiftztt/dollar~\cite{forster-jfp}
+\item The CPS translation of \shiftztt/dollar~\cite{materzok-hierarchy}
+\end{enumerate}
+
+\noindent We show that, by avoiding ``administrative'' constructs in the 
+macro translation, and by being selective in the CPS translation, we obtain 
+the same CPS translation as the unoptimized\footnote{By ``unoptimized 
+translation'', we mean the first-order translation in Figure 5 of 
+Hillerstr\"om et al.~\cite{hillerstrom-cps}.}
+translation given by Hillerstr\"om et al.~\cite{hillerstrom-cps}.
+In what follows, we review the existing CPS translations of \shiftztt/dollar
+and effect handlers (Sections~\ref{sec:cps:shiftz} and \ref{sec:cps:handler}),
+as well as the macro translation from effect handlers to \shiftztt/dollar
+(Section~\ref{sec:cps:macro}).
+We then compose the first and third translations to obtain the second
+translation (Section~\ref{sec:cps:compose}), thus formally relating the CPS
+translations of \shiftztt/dollar and effect handlers.
+
+
+\subsection{CPS Translation of Shift0 and Dollar}
+\label{sec:cps:shiftz}
+
+In Figure~\ref{fig:lambdaszcps}, we present the CPS translation from
+\lambdasz to the plain $\lambda$-calculus (with no value vs. computation 
+distinction).
+The definition is adopted from Hillerstr\"om et al.~\cite{hillerstrom-cps}
+(for the $\lambda$-terms fragment) and Materzok and
+Biernacki~\cite{materzok-hierarchy} (for \shiftztt/dollar).
+We have two mutually-defined translations $\cpsv{\_}$ and $\cps{\_}$,
+taking care of values and computations, respectively.
+The former yields a direct-style value in the $\lambda$-calculus, whereas
+the latter yields a continuation-taking function.
+To go through the cases of the control operators, the translation turns a
+\shiftztt construct into a $\lambda$-abstraction, and a dollar construct
+into an application of the main computation $\cps{M}$ to an ending
+continuation $\abs{x}{\cps{N}}$\footnote{The CPS translation of the original
+dollar operator $\dollar{N}{M}$ is defined as
+$\abs{k}{\app{\cps{N}}{(\abs{f}{\apptwo{\cps{M}}{f}{k}})}}$.}.
+
+\LambdaszCPS
+
+
+\subsection{CPS Translation of Effect Handlers}
+\label{sec:cps:handler}
+
+\LambdahCPS
+
+In Figure~\ref{fig:lambdahcps}, we present the CPS translation from
+\lambdah to the plain $\lambda$-calculus.
+The definition is adopted from Hillerstr\"om et al.~\cite{hillerstrom-cps}.
+We again have separate translations for values and computations.
+Among them, the computation translation yields a function that takes in two
+continuations: a pure continuation $k$ for returning a value, and an effect
+continuation $h$ for handling an operation.
+To go through the interesting cases, the translation of an operation
+calls the effect continuation $h$ representing the interpretation of that
+operation\footnote{The original translation of
+Hillerstr\"om et al.~\cite{hillerstrom-cps} packages the two arguments to
+$h$ into a tuple and associates the tuple with an operation label.}.
+Notice that the resumption $\abs{x}{\apptwo{k}{x}{h}}$ passed to $h$
+includes $h$ itself, reflecting the deep nature of handlers.
+The translation of a handler sets the two continuations for the
+handled computation $\cps{M}$.
+Other cases are the same as the translation of \lambdasz.
+In particular, the translation of the \returntt and \lettt expressions 
+requires only one continuation argument, as the effect continuation can 
+be removed by $\eta$-reduction.
+
+
+\subsection{Macro Translation from \lambdah to \lambdasz}
+\label{sec:cps:macro}
+
+\Macro
+
+\SMacro
+
+Having seen the CPS translations, we look at the macro translation from
+\lambdah to \lambdasz (Figure~\ref{fig:macro}), which is adapted from
+Forster et al.~\cite{forster-jfp}.
+Roughly speaking, the translation converts operations into \shiftztt
+and handlers into dollar.
+Technically, it introduces an effect-continuation-passing mechanism to
+make the operation clause accessible to the \shiftztt operator.
+The result of the translation is somewhat verbose due to the presence of
+the \returntt and \lettt expressions; these are necessary for ensuring that
+the translation produces a well-formed expression in fine-grain call-by-value.
+The original translation of Forster et al. (Figure~\ref{fig:smacro}) is
+simpler, as it is defined on call-by-push-value (where the operator of an
+application may be a computation).
+Note that, in both versions, the translation of $\lambda$-terms is defined
+homomorphically.
+
+
+\subsection{Composing Macro and CPS Translations}
+\label{sec:cps:compose}
+
+Now, let us derive a CPS translation of \lambdah by composing the macro
+translation on \lambdah and the CPS translation on \lambdasz.
+
+\paragraph{Operations}
+
+We begin with the case of operations.
+Below is the na\"ive composition of the macro and CPS translations.
+
+\vspace{-3mm}
+
+\begin{align*}
+& \hspace{4.7mm} \cps{\macro{\doop{V}}} \\
+% macro
+&= \cps{\shiftz{k}
+               {\ret{(\abs{h}
+                          {\letin{v_1}{\app{h}{\macro{V}}}
+                                 {\app{v_1}
+                                      {(\abs{x}
+                                            {\letin{v_2}{\app{k}{x}}
+                                                   {\app{v_2}{h}}})}}}}}} \\
+% CPS
+&= \abs{k}
+       {\abs{k_1}
+            {\app{k_1}
+                 {(\abs{h}
+                       {\abs{k_2}
+                            {\app{\app{h}{\cpsv{\macro{V}}}}
+                                 {(\abs{v_1}
+                                       {\apptwo{v_1}
+                                               {(\abs{x}
+                                                     {\abs{k_3}
+                                                          {\app{\app{k}{x}}
+                                                               {(\abs{v_2}{\apptwo{v_2}{h}{k_3}})}}})}
+                                               {k_2}})}}})}}}
+\end{align*}
+
+\vspace{1mm}
+
+\noindent The result has four continuation variables: $k$, $k_1$, $k_2$,
+and $k_3$.
+Among them, the latter three continuations come from the \returntt and
+\lettt expressions introduced by the macro translation.
+As we mentioned before, these \returntt and \lettt are only necessary for
+the well-formedness of macro-translated expressions.
+In other words, they do not have any computational content.
+What this implies is that, when our ultimate goal is to convert effect
+handlers into plain $\lambda$-terms, we can use a simpler macro translation
+that does not yield these administrative \returntt and \lettt.
+This simpler translation is exactly the original translation of Forster et
+al.~\cite{forster-jfp}.
+
+\vspace{-3mm}
+
+\begin{align*}
+& \hspace{4.7mm} \cps{\macro{\doop{V}}} \\
+% simpler macro
+&= \cps{\shiftz{k}
+               {\abs{h}
+                    {\apptwo{h}{\macro{V}}{(\abs{x}{\apptwo{k}{x}{h}})}}}}
+\end{align*}
+
+\vspace{1mm}
+
+\noindent The result of the simpler macro translation is not a proper 
+expression in fine-grain CBV: the \shiftztt operator has a value body,
+and the body has applications of a function to two values.
+This prevents us from directly applying the CPS translation in 
+Figure~\ref{fig:lambdaszcps}.
+However, we can still reuse the CPS translation, under the principle
+``do not introduce a continuation when it is not necessary''. 
+In the case of the above expression, we simply apply the value 
+translation to the body of \shiftztt and the arguments of the
+applications.
+Such a principle reminds us of \textit{selective} CPS translations in 
+the literature~\cite{nielsen-selective,rompf-selective,asai-selective}.
+
+\vspace{-3mm}
+
+\begin{align*}
+& \hspace{4.7mm} \cps{\shiftz{k}
+                 {\abs{h}
+                      {\apptwo{h}{\macro{V}}{(\abs{x}{\apptwo{k}{x}{h}})}}}} \\
+  % CPS
+&= \abstwo{k}{h}{\apptwo{h}{\cpsv{\macro{V}}}{(\abs{x}{\apptwo{k}{x}{h}})}}
+\end{align*}
+
+\vspace{1mm}
+
+\noindent The result of composition is identical to the existing
+translation of operations, which we saw in Figure~\ref{fig:lambdahcps}.
+
+\paragraph{Handlers}
+
+We next look at the handler case.
+Below is the na\"ive composition of the two translations.
+
+\vspace{-3mm}
+
+\begin{align*}
+& \hspace{4.7mm} \cps{\macro{\handle{M}{x}{M_r}{x}{k}{M_h}}} \\
+% macro
+&= \cps{\letin{v}{\dollarret{\macro{M}}{x}{\ret{\abs{h}{\macro{M_r}}}}}
+                 {\app{v}{(\abs{x}{\ret{\abs{k}{\macro{M_h}}}})}}} \\
+% CPS
+&= \abs{k_1}
+       {(\app{\cps{\macro{M}}}
+             {(\abs{x}{\abs{k_2}{\app{k_2}{(\abs{h}{\cps{\macro{M_r}}})}}})})} \\
+& \hspace{1.16cm} (\abs{v}
+                      {\app{\app{v}{(\abs{x}{\abs{k_3}{\app{k_3}{(\abs{k}{\cps{\macro{M_h}}})}}})}}
+                           {k_1}})
+\end{align*}
+
+\vspace{1mm}
+
+\noindent As in the case of operations, the result has three continuation
+variables $k_1$, $k_2$, and $k_3$ that originate from the macro translation.
+To avoid these continuation variables, we first apply the simpler macro 
+translation, and then selectively apply the CPS traslation.
+This makes the composition more concise, as shown below.
+
+\vspace{-3mm}
+
+\begin{align*}
+& \hspace{4.7mm} \cps{\macro{\handle{M}{x}{M_r}{x}{k}{M_h}}} \\
+% simpler macro
+&= \cps{\app{\dollarret{\macro{M}}{x}{\abs{h}{\macro{M_r}}}}
+            {(\abs{x}{\abs{k}{\macro{M_h}}})}} \\
+% CPS
+&= \app{\cps{\macro{M}}{(\abstwo{x}{h}{\cps{\macro{M_r}}})}}
+       {(\abstwo{x}{k}{\cps{\macro{M_h}}})}
+\end{align*}
+
+\vspace{1mm}
+
+\noindent The result is again identical to the existing translation 
+of handlers, which we saw in Figure~\ref{fig:lambdahcps}.

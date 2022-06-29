@@ -1,0 +1,63 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Variations of Effect Handler Calculi}
+
+There is a discussion of the relationship between effect operations with and
+without a label, which is similar to our discussion of handlers with and
+without the return clause.
+The handling of a labeled operation may involve skipping of handlers that
+do not take care of the operation in question.
+To simulate labeled operations in a calculus with unlabeled operations,
+Biernacki et al.~\cite{biernacki-care} introduce an operator $[\_]$
+called ``lift'', which allows an operation to skip the innermost handler
+and be handled by an outer handler.
+This enables programming with multiple effects without using labels,
+although it requires the programmer to know what handlers are surrounding
+each operation in what order.
+
+
+\paragraph{CPS Translations of Effect Handlers}
+
+The CPS translations of effect handlers have been developed as a technique
+for compiling effect handlers into common runtime platforms.
+For this reason, existing CPS translations are either directed by the
+specific typing discipline of the source
+language~\cite{leijen-cps,brachthauser-mass} or tuned for the particular
+implementation strategy of the compiler~\cite{hillerstrom-cps,hillerstrom-jfp}.
+We derived a CPS translation of effect handlers from the definitional CPS
+translation of \shiftztt and dollar.
+As a result, we obtained a translation that is identical to
+Hillerstr\"om's~\cite{hillerstrom-cps} unoptimized translation, which we
+regard as the definitional translation of general (deep) effect handlers.
+
+
+\paragraph{Type Systems of Effect Handlers}
+
+There are different flavors of type systems for effect handlers.
+In the most traditional type systems~\cite{bauer-effsys,kammar-handler},
+effects are represented as a set of operations, similar to the effect
+systems for side-effect analysis~\cite{nielson-effsys}.
+In some research languages such as Koka~\cite{leijen-koka},
+Frank~\cite{lindley-frank}, and Links~\cite{hillerstrom-links}, effects are
+treated as row types, which were originally developed for type inference
+with records~\cite{remy-record}.
+More recently, several languages~\cite{zhang-tunnel,brachthauser-lightweight}
+adopt the notion of capabilities from object-oriented programming as an
+approach to safe handling of effects.
+Unlike the type system we developed in Section~\ref{sec:type2}, these type
+systems are all defined independent of the CPS translation, and they do not
+explicitly carry answer types.
+
+
+\paragraph{Effect Handlers and Control Operators}
+
+The relationship between effect handlers and control operators has been 
+studied from several different perspectives.
+Forster et al.~\cite{forster-jfp} and Pir\'og et al.~\cite{pirog-typedeq} 
+establish macro translations to compare the expressiveness of the two 
+facilities.
+Kiselyov and Sivaramakrishnan~\cite{kiselyov-eff} define a similar 
+translation to embed the Eff language into OCaml.
+We exploit the results of these studies to enhance our understanding of 
+effect handlers.

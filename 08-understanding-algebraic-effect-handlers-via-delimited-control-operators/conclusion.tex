@@ -1,0 +1,29 @@
+\section{Conclusion and Future Perspectives}
+\label{sec:conclusion}
+
+In this paper, we presented three results from our study on understanding
+deep effect handlers via the \shiftztt and dollar operators.
+Specifically, we defined a pair of macro translations that add and remove
+the return clause, derived a CPS translation for effect handlers from the
+CPS translation for \shiftztt/dollar, and designed a type system for effect
+handlers from the CPS translation.
+
+As a continuation of this work, we intend to visit those challenges that
+have been solved for \shiftztt and dollar (or reset) but not for effect
+handlers.
+One question we would like to investigate is whether effect handlers can 
+fully express the CPS hierarchy~\cite{danvy-abstracting}.
+The other question we are interested in is how to give an equational 
+axiomatization~\cite{materzok-axiom} and a reflection~\cite{biernacki-stack}
+of effect handlers.
+By answering these questions, we would be able to discover novel 
+tecnhiques for implementing, optimizing, and reasoning about effect 
+handlers.
+
+As an extension of our approach, we plan to study shallow effect
+handlers~\cite{hillerstrom-shallow} by leveraging their connection to
+the \controlztt and \promptztt operators~\cite{pirog-typedeq}.
+These operators have a more complex semantics due to the absence of the
+delimiter surrounding captured continuations, but we conjecture that it
+is possible to establish similar results to what we have presented in this
+paper.
