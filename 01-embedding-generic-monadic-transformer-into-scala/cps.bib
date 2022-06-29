@@ -1,0 +1,424 @@
+
+@inproceedings{DBLP:conf/icfp/RompfMO09,
+  author    = {Tiark Rompf and
+               Ingo Maier and
+               Martin Odersky},
+  editor    = {Graham Hutton and
+               Andrew P. Tolmach},
+  title     = {Implementing first-class polymorphic delimited continuations by a
+               type-directed selective {CPS}-transform},
+  booktitle = {Proceeding of the 14th {ACM} {SIGPLAN} international conference on
+               Functional programming, {ICFP} 2009, Edinburgh, Scotland, UK, August
+               31 - September 2, 2009},
+  pages     = {317--328},
+  publisher = {{ACM}},
+  year      = {2009},
+  url       = {https://doi.org/10.1145/1596550.1596596},
+  doi       = {10.1145/1596550.1596596},
+  timestamp = {Fri, 25 Jun 2021 14:48:54 +0200},
+  biburl    = {https://dblp.org/rec/conf/icfp/RompfMO09.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+#  TODO: Functional probabilistic programming for scalable Bayesian modelling
+#  TODO: Rainier
+
+
+@inproceedings{StuckiAJR13scala,
+  author =       {Stucki, Sandro and
+                  Amin, Nada and
+                  Jonnalagedda, Manohar and
+                  Rompf, Tiark},
+  title =        {What Are the Odds? Probabilistic Programming in
+                  {Scala}},
+  booktitle =    {Proceedings of the 4th Workshop on Scala},
+  series =       {SCALA '13},
+  month =        {2 July},
+  year =         {2013},
+  address =      {Montpellier, France},
+  isbn =         {978-1-4503-2064-1},
+  location =     {Montpellier, France},
+  pages =        {11:1--11:9},
+  articleno =    {11},
+  numpages =     {9},
+  ee =           {http://doi.acm.org/10.1145/2489837.2489848},
+  doi =          {10.1145/2489837.2489848},
+  publisher =    {ACM, New York, NY, USA},
+}
+
+@article{10.1145/2887747.2804317,
+author = {Adam and Ghahramani, Zoubin and Gordon, Andrew D.},
+title = {Practical Probabilistic Programming with Monads},
+year = {2015},
+issue_date = {December 2015},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {50},
+number = {12},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/2887747.2804317},
+doi = {10.1145/2887747.2804317},
+abstract = { The machine learning community has recently shown a lot of interest in practical
+probabilistic programming systems that target the problem of Bayesian inference. Such
+systems come in different forms, but they all express probabilistic models as computational
+processes using syntax resembling programming languages. In the functional programming
+community monads are known to offer a convenient and elegant abstraction for programming
+with probability distributions, but their use is often limited to very simple inference
+problems. We show that it is possible to use the monad abstraction to construct probabilistic
+models for machine learning, while still offering good performance of inference in
+challenging models. We use a GADT as an underlying representation of a probability
+distribution and apply Sequential Monte Carlo-based methods to achieve efficient inference.
+We define a formal semantics via measure theory. We demonstrate a clean and elegant
+implementation that achieves performance comparable with Anglican, a state-of-the-art
+probabilistic programming system. },
+journal = {SIGPLAN Not.},
+month = aug,
+pages = {165–176},
+numpages = {12},
+keywords = {monads, Bayesian statistics, Monte Carlo, probabilistic programming, Haskell}
+}
+
+@misc{law2019functional,
+      title={Functional probabilistic programming for scalable Bayesian modelling}, 
+      author={Jonathan Law and Darren Wilkinson},
+      year={2019},
+      eprint={1908.02062},
+      archivePrefix={arXiv},
+      primaryClass={stat.CO}
+}
+
+
+@misc{hallerScalaAsync,
+      title={scala-async}, 
+      author    = {Philipp Haller and Lightbend},
+      year      = {2013},
+      url       = {https://github.com/scala-async/scala-async}
+}
+
+
+@InProceedings{prokopec_et_al:LIPIcs:2018:9208,
+  author =	{Aleksandar Prokopec and Fengyun Liu},
+  title =	{{Theory and Practice of Coroutines with Snapshots}},
+  booktitle =	{32nd European Conference on Object-Oriented Programming  (ECOOP 2018)},
+  pages =	{3:1--3:32},
+  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
+  ISBN =	{978-3-95977-079-8},
+  ISSN =	{1868-8969},
+  year =	{2018},
+  volume =	{109},
+  editor =	{Todd Millstein},
+  publisher =	{Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik},
+  address =	{Dagstuhl, Germany},
+  URL =		{http://drops.dagstuhl.de/opus/volltexte/2018/9208},
+  URN =		{urn:nbn:de:0030-drops-92087},
+  doi =		{10.4230/LIPIcs.ECOOP.2018.3},
+  annote =	{Keywords: coroutines, continuations, coroutine snapshots, asynchronous programming, inversion of control, event-driven programming}
+}
+
+
+@article{DBLP:journals/corr/HallerM15,
+  author    = {Philipp Haller and
+               Heather Miller},
+  title     = {A Formal Model for Direct-style Asynchronous Observables},
+  journal   = {CoRR},
+  volume    = {abs/1511.00511},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1511.00511},
+  archivePrefix = {arXiv},
+  eprint    = {1511.00511},
+  timestamp = {Mon, 13 Aug 2018 16:48:49 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/HallerM15.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@article{DBLP:journals/jfp/BrachthauserSO20,
+  author    = {Jonathan Immanuel Brachth{\"{a}}user and
+               Philipp Schuster and
+               Klaus Ostermann},
+  title     = {Effekt: Capability-passing style for type- and effect-safe, extensible
+               effect handlers in Scala},
+  journal   = {J. Funct. Program.},
+  volume    = {30},
+  pages     = {e8},
+  year      = {2020},
+  url       = {https://doi.org/10.1017/S0956796820000027},
+  doi       = {10.1017/S0956796820000027},
+  timestamp = {Tue, 16 Jun 2020 17:16:55 +0200},
+  biburl    = {https://dblp.org/rec/journals/jfp/BrachthauserSO20.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+
+@inproceedings{10.1145/1086365.1086390,
+author = {Kiselyov, Oleg and Shan, Chung-chieh and Friedman, Daniel P. and Sabry, Amr},
+title = {Backtracking, Interleaving, and Terminating Monad Transformers: (Functional Pearl)},
+year = {2005},
+isbn = {1595930647},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1086365.1086390},
+doi = {10.1145/1086365.1086390},
+abstract = {We design and implement a library for adding backtracking computations to any Haskell
+monad. Inspired by logic programming, our library provides, in addition to the operations
+required by the MonadPlus interface, constructs for fair disjunctions, fair conjunctions,
+conditionals, pruning, and an expressive top-level interface. Implementing these additional
+constructs is easy in models of backtracking based on streams, but not known to be
+possible in continuation-based models. We show that all these additional constructs
+can be generically and monadically realized using a single primitive msplit. We present
+two implementations of the library: one using success and failure continuations; and
+the other using control operators for manipulating delimited continuations.},
+booktitle = {Proceedings of the Tenth ACM SIGPLAN International Conference on Functional Programming},
+pages = {192–203},
+numpages = {12},
+keywords = {logic programming, continuations, streams, control delimiters, Haskell, Prolog},
+location = {Tallinn, Estonia},
+series = {ICFP '05}
+}
+
+
+@article{10.1145/1090189.1086390,
+author = {Kiselyov, Oleg and Shan, Chung-chieh and Friedman, Daniel P. and Sabry, Amr},
+title = {Backtracking, Interleaving, and Terminating Monad Transformers: (Functional Pearl)},
+year = {2005},
+issue_date = {September 2005},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {9},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1090189.1086390},
+doi = {10.1145/1090189.1086390},
+abstract = {We design and implement a library for adding backtracking computations to any Haskell
+monad. Inspired by logic programming, our library provides, in addition to the operations
+required by the MonadPlus interface, constructs for fair disjunctions, fair conjunctions,
+conditionals, pruning, and an expressive top-level interface. Implementing these additional
+constructs is easy in models of backtracking based on streams, but not known to be
+possible in continuation-based models. We show that all these additional constructs
+can be generically and monadically realized using a single primitive msplit. We present
+two implementations of the library: one using success and failure continuations; and
+the other using control operators for manipulating delimited continuations.},
+journal = {SIGPLAN Not.},
+month = sep,
+pages = {192–203},
+numpages = {12},
+keywords = {streams, control delimiters, Prolog, Haskell, logic programming, continuations}
+}
+
+@article{10.1145/601775.601776,
+author = {Wadler, Philip and Thiemann, Peter},
+title = {The Marriage of Effects and Monads},
+year = {2003},
+issue_date = {January 2003},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {4},
+number = {1},
+issn = {1529-3785},
+url = {https://doi.org/10.1145/601775.601776},
+doi = {10.1145/601775.601776},
+abstract = {Gifford and others proposed an effect typing discipline to delimit the scope of computational
+effects within a program, while Moggi and others proposed monads for much the same
+purpose. Here we marry effects to monads, uniting two previously separate lines of
+research. In particular, we show that the type, region, and effect system of Talpin
+and Jouvelot carries over directly to an analogous system for monads, including a
+type and effect reconstruction algorithm. The same technique should allow one to transpose
+any effect system into a corresponding monad system.},
+journal = {ACM Trans. Comput. Logic},
+month = jan,
+pages = {1–32},
+numpages = {32},
+keywords = {Monad, type reconstruction, type, region, effect}
+}
+
+@article{claessen_1999, title={A poor man's concurrency monad}, volume={9}, DOI={10.1017/S0956796899003342}, number={3}, journal={Journal of Functional Programming}, publisher={Cambridge University Press}, author={Claessen, Koen}, year={1999}, pages={313–323}}
+
+
+@article{10.1145/3386325,
+author = {Syme, Don},
+title = {The Early History of {F\#}},
+year = {2020},
+issue_date = {June 2020},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {4},
+number = {HOPL},
+url = {https://doi.org/10.1145/3386325},
+doi = {10.1145/3386325},
+journal = {Proc. ACM Program. Lang.},
+month = jun,
+articleno = {75},
+numpages = {58}
+}
+
+
+@inproceedings{computation-zoo-padl14,
+  author    = {Petricek, Tomas and Syme, Don},
+  title     = {The {F\#} Computation Expression Zoo},
+  booktitle = {Proceedings of Practical Aspects of Declarative Languages},
+  series    = {PADL 2014},
+  location  = {San Diego, CA, USA},
+  year      = {2014}
+}
+
+
+@article{ScalaVirtualized,
+author = {Rompf, Tiark and Amin, Nada and Moors, Adriaan and Haller, Philipp and Odersky, Martin},
+title = {Scala-Virtualized: Linguistic Reuse for Deep Embeddings},
+year = {2012},
+issue_date = {March 2012},
+publisher = {Kluwer Academic Publishers},
+address = {USA},
+volume = {25},
+number = {1},
+issn = {1388-3690},
+url = {https://doi.org/10.1007/s10990-013-9096-9},
+doi = {10.1007/s10990-013-9096-9},
+journal = {Higher Order Symbol. Comput.},
+month = mar,
+pages = {165–207},
+numpages = {43},
+keywords = {Code generation, Language virtualization, Linguistic reuse, Domain-specific languages}
+}
+
+@inproceedings{10.1145/174675.178047,
+author = {Filinski, Andrzej},
+title = {Representing Monads},
+year = {1994},
+isbn = {0897916360},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/174675.178047},
+doi = {10.1145/174675.178047},
+abstract = {We show that any monad whose unit and extension operations are expressible as purely
+functional terms can be embedded in a call-by-value language with “composable continuations”.
+As part of the development, we extend Meyer and Wand's characterization of the relationship
+between continuation-passing and direct style to one for continuation-passing vs.
+general “monadic” style. We further show that the composable-continuations construct
+can itself be represented using ordinary, non-composable first-class continuations
+and a single piece of state. Thus, in the presence of two specific computational effects
+- storage and escapes - any expressible monadic structure (e.g., nondeterminism as
+represented by the list monad) can be added as a purely definitional extension, without
+requiring a reinterpretation of the whole language. The paper includes an implementation
+of the construction (in Standard ML with some New Jersey extensions) and several examples.},
+booktitle = {Proceedings of the 21st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {446–457},
+numpages = {12},
+location = {Portland, Oregon, USA},
+series = {POPL '94}
+}
+
+@article{10.1016/j.scico.2004.03.004,
+author = {Erwig, Martin and Ren, Deling},
+title = {Monadification of Functional Programs},
+year = {2004},
+issue_date = {August 2004},
+publisher = {Elsevier North-Holland, Inc.},
+address = {USA},
+volume = {52},
+number = {1–3},
+issn = {0167-6423},
+url = {https://doi.org/10.1016/j.scico.2004.03.004},
+doi = {10.1016/j.scico.2004.03.004},
+abstract = {The structure of monadic functional programs allows the integration of many different
+features by just changing the definition of the monad and not the rest of the program,
+which is a desirable feature from a software engineering and software maintenance
+point of view. We describe an algorithm for the automatic transformation of a group
+of functions into such a monadic form. We identify two correctness criteria and argue
+that the proposed transformation is at least correct in the sense that transformed
+programs yield the same results as the original programs modulo monad constructors.The
+translation of a set of functions into monadic form is in most cases only a first
+step toward an extension of a program by adding new features. The extended behavior
+can be realized by choosing an appropriate monad type and by inserting monadic actions
+into the functions that have been transformed into monadic form. We demonstrate an
+approach to the integration of monadic actions that is based on the idea of specifying
+context-dependent rewritings.},
+journal = {Sci. Comput. Program.},
+month = aug,
+pages = {101–129},
+numpages = {29}
+}
+
+@inproceedings{10.1145/174675.178053,
+author = {Hatcliff, John and Danvy, Olivier},
+title = {A Generic Account of {Continuation-Passing Styles}},
+year = {1994},
+isbn = {0897916360},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/174675.178053},
+doi = {10.1145/174675.178053},
+abstract = {We unify previous work on the continuation-passing style (CPS) transformations in
+a generic framework based on Moggi's computational meta-language. This framework is
+used to obtain CPS transformations for a variety of evaluation strategies and to characterize
+the corresponding administrative reductions and inverse transformations. We establish
+generic formal connections between operational semantics and equational theories.
+Formal properties of transformations for specific evaluation orders follow as corollaries.Essentially,
+we factor transformations through Moggi's computational m
+eta-language. Mapping λ-terms into the meta-language captures computation properties
+(e.g., partiality, strictness) and evaluation order explicitly in both the term and
+the type structure of the meta-language. The CPS transformation is then obtained by
+applying a generic transformation from terms and types in the meta-language to CPS
+terms and types, based on a typed term representation of the continuation monad. We
+prove an adequacy property for the generic transformation and establish an equational
+correspondence between the meta-language and CPS terms.These generic results generalize
+Plotkin's seminal theorems, subsume more recent results, and enable new uses of CPS
+transformations and their inverses. We discuss how to aply these results to compilation.},
+booktitle = {Proceedings of the 21st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {458–471},
+numpages = {14},
+location = {Portland, Oregon, USA},
+series = {POPL '94}
+}
+
+@book{hoare1985communicating,
+  added-at = {2012-07-05T11:45:59.000+0200},
+  author = {Hoare, C.A.R.},
+  biburl = {https://www.bibsonomy.org/bibtex/26f87fb1e48ea82d82ba532f04c847f4e/gron},
+  interhash = {c57cff814bc63114c11e24864df0649c},
+  intrahash = {6f87fb1e48ea82d82ba532f04c847f4e},
+  isbn = {9780131532892},
+  keywords = {{CSP} Formalism Semantics},
+  publisher = {Prentice Hall},
+  series = {Prentice-Hall International Series in Computer Science},
+  timestamp = {2012-07-05T11:45:59.000+0200},
+  title = {Communicating Sequential Processes},
+  url = {http://www.usingcsp.com/cspbook.pdf},
+  year = 1985
+}
+
+
+
+@misc{ProjectLoom,
+      title={Project Loom}, 
+      author    = {Oracle},
+      year      = {2018-2022},
+      url       = {https://openjdk.java.net/projects/loom/}
+}
+
+@article{10.1145/242224.242477,
+author = {Hudak, Paul},
+title = {Building Domain-Specific Embedded Languages},
+year = {1996},
+issue_date = {Dec. 1996},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {28},
+number = {4es},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/242224.242477},
+doi = {10.1145/242224.242477},
+journal = {ACM Comput. Surv.},
+month = {dec},
+pages = {196–es}
+}
+
+@techreport{brachthaeuser21representing,
+  author = {Brachthäuser, Jonathan and Boruch-Gruszecki, Aleksander and Odersky, Martin},
+  title = {Representing Monads with Capabilities},
+  institution = {Higher-Order Programming with Effects ({HOPE})},
+  year = {2021},
+  url = {https://github.com/lampepfl/monadic-reflection}
+}
+
