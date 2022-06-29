@@ -1,0 +1,74 @@
+\documentclass{llncs}
+
+\input{macros/imports}
+\input{macros/setups}
+\input{macros/general}
+\input{macros/context}
+\input{macros/languages}
+\input{macros/symbols}
+\input{macros/maps}
+\input{macros/abbreviations}
+
+\begin{document}
+
+\title{Semantic equivalence of task-oriented programs in TopHat}
+
+% \titlerunning{Semantic equivalence in TopHat}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+
+\author{
+  Tosca Klijnsma\inst{1}\orcidID{0002-0982-5880}\and
+  Tim Steenvoorden\inst{2}\orcidID{0002-8436-2054}
+}
+
+\authorrunning{Klijnsma and Steenvoorden}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+
+\institute{
+  Radboud University, Nijmegen, The Netherlands. \email{tosca.klijnsma@gmail.com} \and
+  Open University, Heerlen, The Netherlands. \email{tim.steenvoorden@ou.nl}
+}
+
+\maketitle
+% typeset the header of the contribution
+
+\begin{abstract}
+  \input{sections/abstract}
+  \keywords{Task-oriented programming \and Program equivalence \and Formal semantics.}
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/tophat}
+% \input{sections/examples}
+\input{sections/equivalence}
+\input{sections/expressions}
+\input{sections/conditions}
+\input{sections/tasks}
+\input{sections/laws}
+% \input{sections/relatedwork}
+\input{sections/recap}
+\input{sections/futurework}
+
+%% Acknowledgements
+\paragraph{Acknowledgements}
+\input{sections/acknowledgements}
+
+%% Bibliography
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+\let\section\oldsection
+\bibliographystyle{splncs04}
+% \bibliographystyle{plainnat}
+\bibliography{dblp,other}
+
+%% Appendix
+\newpage
+\appendix
+
+\input{sections/interplay}
+% \input{sections/examples}
+% \input{sections/grammars}
+
+\end{document}

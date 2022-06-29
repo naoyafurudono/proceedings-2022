@@ -1,0 +1,133 @@
+\startcomponent expressions
+\product thesis
+\environment thesislayout
+
+\section[sec:exprequiv]{Expression equivalence}
+
+Before we consider semantic equivalence of tasks, we first look at semantic equivalence of expressions in the host language.
+Let us start with an example.
+
+\startexample[exm:expression-equivalence]{Expression equivalence}
+  Consider the following two expressions:
+  \startformulas[align]
+    \NC e_1 \NC:=\NC \lambda x:\Int.\ \Ite{x < 0}{-x}{x}    \NR
+    \NC e_2 \NC:=\NC \lambda y:\Int.\ \Ite{y \geq 0}{y}{-y} \NR
+  \stopformulas
+  \noindentation
+  It should be obvious that these two functions are equivalent: they both return the absolute value of their argument.
+  Therefore, we should be able to use them interchangeably within any \TOPHAT-program without changing its behavior.
+  So even though the functions $e_1$ and $e_2$ are different, we will never detect a difference between them when they are being used within a \TOPHAT-program, because for all possible arguments, $e_1$ and $e_2$ evaluate to the same result.
+\stopexample
+
+When deciding if two expressions in the host language are equivalent, it is not enough to just look at the resulting value after evaluation.
+We need to consider all \emph{contexts} that an expression can be used in.
+This leads to the definition of \emph{contextual equivalence}.
+Pitts \cite[conf/ac/Pitts00] defines contextual equivalence informally as follows:
+
+\startquotation
+  Two phrases of a programming language are \emph{contextually equivalent} if
+  any occurrences of the first phrase in a complete program can be replaced
+  by the second phrase without affecting the observable results of executing
+  the program.
+\stopquotation
+
+\doifthesis{
+  \placefigure[bottom][fig:contexts-grammar]
+    {Context grammar for expressions}
+    {\startgrammar
+      \useproduction{G-Expression-contexts}
+    \stopgrammar}
+}
+
+This kind of equivalence is also called \emph{operational}, or \emph{observational} equivalence.
+To formally define such a notion of contextual equivalence for a given programming language, we must answer two questions:
+\startitemize[n,compact]
+  \item What is a \emph{complete program}?
+  \item What are the \emph{observable results}?
+\stopitemize
+Depending on the answers to these two questions,
+this can result in different definitions of semantic equivalence for the same programming language \cite[conf/ac/Pitts00].
+%
+For expressions in \TOPHAT, we answer these two questions as follows:
+\startitemize[n]
+  \item We will consider an expression in the host-language a complete program if it does not contain any free variables.
+  \item The only observation we are interested in is the resulting value after evaluation.
+\stopitemize
+
+\doifthesis{
+  \placefigure[top][fig:contexts-tasks-grammar]
+    {Context grammar for tasks}
+    {\startgrammar
+      \useproduction{G-Pre-task-contexts}
+      \useproduction{G-Pre-editor-contexts}
+    \stopgrammar}
+}
+
+We need a way to substitute an expression in a program by another.
+For this, we use the notion of an expression context.
+An \emph{expression context} $E[\cdot]$ is a complete program that can contain holes, denoted by the symbol $\cdot$, which can be filled.
+We write $E[e]$ for the expression that results from replacing all occurrences of $\cdot$ in $E$ by $e$.
+So, we will replace all holes with the same expression $e$.
+In the most common case, there will be just one hole in $E$ to be filled.
+\doifthesiselse{
+  \seein{Figures}[fig:contexts-grammar] \seein{and}[fig:contexts-tasks-grammar] give the grammars for expression-, pre-task-, and pre-editor-contexts.
+}{
+  \see[fig:contexts] gives the grammars for expression- and task-contexts.
+}
+% Note that the grammar for expression contexts does not allow contexts under lambdas.
+% Otherwise we would be able to construct open expressions with free variables,
+% violating point\~1.
+
+\doifpaper{
+  \placefigure[][fig:contexts]
+    {Context grammar}
+    {\sidebyside
+      {\usemacro{G-Expression-contexts}}
+      {\usemacro{G-Task-contexts}}
+    }
+}
+
+\doifthesis{
+  The resulting values of \TOPHAT\ programs are those given in the value grammar given in \see[fig:value-host-grammar].
+}
+If we would allow contexts $E$ to be of every available type,
+we would have the same problem as introduced in \see[exm:expression-equivalence].
+Then, $E$ can also be a lambda function and we can only determine that two lambda functions are equivalent by considering all contexts that they can be used in.
+To avoid a circular definition,
+our definition of expression equivalence will only quantify over contexts of basic types $\beta$.
+Indeed, we can only directly observe the equivalence of two basic values.
+
+Taking this together, this leads to the following definition of expression equivalence:
+\startdefinition[def:expressions-eq]{Expression equivalence ($\exprequiv$)}
+  Given two expressions $e_1, e_2 : \tau$
+  where $\tau \neq \Task\ \tau'$ for some $\tau'$,
+  we say that $e_1$ and $e_2$ are semantically equivalent,
+  written $e_1 \exprequiv e_2$
+  \NL if for all contexts $E[\cdot] : \beta$ where $\cdot : \tau$, and for all values $b : \beta$
+  \NL we have that $E[e_1] \evaluate b$ if and only if $E[e_2] \evaluate b$
+\stopdefinition
+
+Actually proving that two expressions are contextually equivalent is hard, as we would need to quantify over all contexts.
+That is, we would need to consider all possible ways that a program can use an expression.
+However, showing that two expressions $e_1$ and $e_2$ are contextually \emph{in}equivalent is straightforward.
+All we have to do is find one context $E[\cdot]:\beta$ such that $E[e_1] \evaluate b_1$ and $E[e_2] \evaluate b_2$ with $b_1 \neq b_2$.
+
+\startexample[exm:expr-inequiv]{Expression inequivalence}
+  The expressions
+  \startformulas[align]
+    \NC e_1 \NC:=\NC \lambda x:\Int.\ \Ite{x < 0}{2}{3} \NR
+    \NC e_2 \NC:=\NC \lambda x:\Int.\ \Ite{x > 0}{3}{2} \NR
+  \stopformulas
+  \noindentation
+  are not contextually equivalent.
+  Take the context $E[\cdot]:\Int$ with $E[\cdot] =\ \cdot\ 0$, then:
+  \startformulas[align]
+    \NC E[e_1] \NC=\NC (\lambda x:\Int.\ \Ite{x < 0}{2}{3})\ 0 \evaluate 3 \NR
+    \NC E[e_2] \NC=\NC (\lambda x:\Int.\ \Ite{x > 0}{3}{2})\ 0 \evaluate 2 \NR
+  \stopformulas
+  \noindentation
+  So we found a context for which both expressions evaluate to a different (basic) value.
+\stopexample
+
+
+\stopcomponent

@@ -1,0 +1,30 @@
+% \section{Overview of semantic relations and functions}
+
+\placefigure[][fig:semantic-functions]
+  {Semantic functions and their relation
+  (read $x \bullet\!\!\lowerbox{0.1ex}{\mbox{–}}\ y$ as `$x$ makes use of $y$')}
+  {\startpicture[x=1pc,y=0.8pc,line width=1pt,*/.tip=Circle,align=center]
+    \node (h)  at ( 3,  0) {handle ($\handle{}$)};
+    \node (oi) at (10,-1.5){inputs ($\Inputs$)};
+    \node (i)  at ( 3, -3) {interact ($\interact{}$)};
+    \draw[dashed,thin] (-9,-4.5) -- (14,-4.5);
+    \node (f)  at ( 3, -6) {fixate ($\fixate$)};
+    % \node (ow) at (10, -6) {watching ($\Watching$)};
+    \node (n)  at ( 3, -9) {normalise ($\normalise$)};
+    \node (ov) at (10, -9) {failing ($\Failing$)\\ value ($\Value$)};
+    \draw[dashed,thin] (-9,-10.5) -- (14,-10.5);
+    \node (e)  at ( 3,-12) {evaluate ($\evaluate$)};
+    %
+    % \node     at (3,-14) {(\small read $x \bullet\!\!\lowerbox{0.1ex}{\mbox{–}}\ y$ as `$x$ makes use of $y$')};
+    %
+    \node[anchor=west] (el) at (-8,-1.5) {\emph{external layer}};
+    \node[anchor=west] (il) at (-8,-7.5) {\emph{internal layer}};
+    \node[anchor=west] (hl) at (-8,-12)  {\emph{host layer}};
+    %
+    \draw[-*] (e) -- (n);
+    \draw[-*] (n) -- (f);
+    \draw[-*] (f) -- (i);
+    \draw[-*] (h) -- (i);
+    % \draw[-*] (ow) -- (f);
+    \draw[-*] (ov) -- (n);
+  \stoppicture}

@@ -1,0 +1,119 @@
+\section[sec:introduction]{Introduction}
+
+Task-oriented programming (\TOP) is a relatively new programming paradigm designed for developing distributed interactive multi-user workflow systems.
+In this programming paradigm, the concept of a \emph{task} plays a central role.
+A task is a unit of work assigned to some user, and consists of two parts: a description of the work that should be done, and a typed interface that defines the type of the task value that it returns.
+Tasks are described in an abstract, declarative manner, and from this abstract description, a \TOP\ engine automatically generates a \GUI.
+It also takes care of the client-server communication and user authentication that is needed for users to work together on tasks.
+\TOP\ allows programmers to define workflows which describe what tasks should be executed by its users, without having to worry about how this is achieved.
+
+
+% \paragraph{Collaboration in TOP}
+
+User collaboration is a central concept in \TOP.
+The different ways in which users can collaborate are captured by \emph{task combinators}.
+By using these combinators, \TOP-programmers can construct larger tasks from smaller ones in several ways.
+There is \emph{sequential composition}, which allows tasks to be executed one after the other.
+And there is \emph{parallel composition}, which allows tasks to be executed in parallel at the same time.
+For parallel composition, it is possible to either combine the results, or to conditionally continue with either one of two tasks.
+
+In order to collaborate, users also need to be able to communicate with each other, and with the system.
+Using task combinators, it is possible to pass along \emph{data} from one task onto the next.
+For communication with the outside world, there are \emph{editors}.
+They provide interaction with the environment via \emph{input} events.
+Editors are typed containers which remember the last value that has been sent to them, and users can communicate with the system through these editors.
+Furthermore, editors allow users to view and edit \emph{shared data}, which are mutable references whose changes are immediately visible to all other tasks watching them.
+
+Another important element of \TOP\ is that task are \emph{typed}.
+This is important to determine the type of the values that are communicated to other tasks and to the environment.
+Not all tasks have a value, and a task does not just produce a value when it is completed.
+Instead, a task's value is continually updated while the work takes place, and can be observed at any point during execution.
+Moreover, it may be possible that a task is never completed, and that its value never reaches a stable condition.
+A task's value reflects a task's current progress.
+They can be inspected by other tasks to base decisions on, which in turn can impact the things users can see or do.
+
+Finally, the \TOP\ language is \emph{modular}:
+tasks are composed of smaller tasks, and can be arguments to or results of functions.
+This allows programmers to re-use tasks, and to model their own collaboration patterns using higher-order tasks \cite[conf/ppdp/PlasmeijerLMAK12].
+
+
+\subsubject{Related work}
+% \paragraph{TOP engines}
+
+\TOP\ describes in an abstract way \emph{what} work should be done by the system and its users.
+It does not describe \emph{how} this should be done,
+this question should be answered by a \emph{\TOP\ engine}.
+The \ITASKS\ engine \cite[conf/cefp/AchtenKP13] is an implementation of \TOP, written in the pure and lazy functional programming language \CLEAN\ \cite[plasmeijer2002clean].
+It is implemented as a shallowly embedded domain-specific language, which means that it inherits features from its host language \CLEAN.
+Amongst these features is a strong typing system, and because \CLEAN\ is a functional language, it allows task combinators to be expressed as functions.
+From the high level description of the tasks, \ITASKS\ generates a web application that is able to execute the described tasks.
+It takes care of generating a \GUI, and of coordinating the tasks in a distributed manner by using a client-server architecture.
+The server side of an \ITASKS\ application runs a web service to which users on a wide range of different devices can connect, and the client side realises the front-end components.
+This way, programmers of iTasks-programs need not be concerned by lower-level implementation details.
+\ITASKS\ has shown itself effective in the past for the implementation of interactive, distributed, workflow applications \cite[conf/iscram/LijnseJP12,conf/sfp/StutterheimAP17].
+
+
+% \paragraph{TOP formalisations}
+
+Because \ITASKS\ has been designed for developing real-world applications, reasoning formally about \ITASKS\ programs is hard \cite[conf/ifl/KoopmanPA08].
+Steenvoorden et.al \cite[conf/ppdp/SteenvoordenNK19] introduces \TOPHAT, a formal language plus operational semantics for reasoning about task-oriented programs.
+% A follow up paper, \emph{TopHat Next: even more stylish task-oriented programming}, is currently being written \cite[TopHatNext].
+% This thesis uses these two papers as starting point.
+The semantics of \TOPHAT\ have been machine verified\footnote{\url{https://github.com/timjs/tophat-proofs}}
+using the dependently typed programming language \IDRIS\ \cite[journals/jfp/Brady13].
+These formal semantics have been used to prove user defined properties of tasks using symbolic execution \cite[conf/ifl/NausSK19].
+An example of this are the circumstances when a a tax subsidy request for solar panels should be granted.
+Symbolic execution has also been applied to generate next step hints for end users \cite[conf/sfp/NausS20].
+For example, does the given data during a subsidy request indeed lead to subsidy greater then zero?
+
+
+\subsubject{Motivation}
+
+% However,
+When two tasks are equivalent is a long standing open research question.
+The formal semantics of \TOPHAT\ are a good starting point to investigate this question.
+\TOPHAT\ is a domain specific language embedded in the \STLC.
+The semantic equivalence in context of the (simply typed) $\lambda$-calculus has been extensively studied \cite[conf/ac/Pitts00,Sewell2009].
+As \TOPHAT\ is build on top of the \STLC,
+we can relay on this work for equivalence in the host language.
+However, this knowledge is not immediately transferable to the world of tasks.
+There, we need to take the semantics of task constructs into account.
+
+\startexample[exm:task-absolute-value]{Task equivalence}
+  The next two tasks both ask end users to enter an integer (using $\Enter$),
+  and thereafter (using $\Step$) show the absolute value of the given integer (using $\View$):
+  \startformulas[align]
+    \NC t_1 \NC:=\NC \Enter\Int \Step \lambda x:\Int.\ \Ite{x < 0}{\View (-x)}{\View x}    \NR
+    \NC t_2 \NC:=\NC \Enter\Int \Step \lambda y:\Int.\ \Ite{y \geq 0}{\View y}{\View (-y)} \NR
+  \stopformulas
+  It should be clear that these two tasks are equivalent.
+\stopexample
+
+% Our research question is the following:
+
+% \startquotation
+%   When are two programs in \TOPHAT\ semantically equivalent?
+% \stopquotation
+
+If we can define such a notion of semantic equivalence for task-oriented programs, what interesting properties can we prove (or disprove)?
+If we know that one task-oriented program is semantically equivalent to another, then we know that we can substitute one for the other, without changing the meaning of the program,
+which in turn could be useful for doing compiler optimizations.
+An example of such optimisations is whether the monad laws hold for the step combinator ($\Step$) used in above example.
+Showing that certain equalities hold for task-oriented programs could also prove useful for the \ITASKS\ system in the future.
+
+
+\subsubject{Structure}
+
+The remainder of this paper is structured as follows.
+\see[sec:tophat] will explain the components of the \TOPHAT\ language,
+together with some examples.
+We will follow the updated semantics presented in \cite[Steenvoorden22].
+%
+% In the following two sections, \see[sec:exprequiv] and \see[sec:taskequiv],
+% we will look at when two expressions in the host-language and two tasks are semantically equivalent.
+In the following section, \see[sec:contextequiv], we give a short overview of what contextual equivalence means.
+Then, in \see[sec:exprequiv], we give a definition for the semantic equivalence of two expressions in our host language,
+and in \see[sec:conditions] we show that a task can be in either one of five conditions.
+For every two tasks in the same condition, we define what it means for them to be semantically equivalent in \see[sec:taskequiv].
+Additionally, \see[sec:laws] presents a set of laws that we believe hold true or false for \TOPHAT-programs according to our definition.
+Finally, \see[sec:conclusions] will conclude this paper.

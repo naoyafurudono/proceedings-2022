@@ -1,0 +1,10 @@
+\placefigure[b][fig:editor-state]
+  {Possible states of editors and its transitions}
+  {\startpicture[x=1pc,y=1pc,line width=1pt,>={Triangle},align=center]
+    \node (unvalued) [circle,draw,minimum size=3pc,very thick]                     {\emph{un-}\\\emph{valued}};
+    \node (valued)   [circle,draw,minimum size=3pc,very thick,right=4 of unvalued] {\emph{valued}};
+    \node (shared)   [circle,draw,minimum size=3pc,very thick,right=6 of valued]   {\emph{shared}};
+    \path (unvalued) edge[->] node[above] {Enter} (valued);
+    \path (valued.north) edge[->,out=60,in=30,looseness=6] node[above right] {Update} (valued.north east);
+    \path (shared.north) edge[->,out=60,in=30,looseness=6] node[above right] {Change} (shared.north east);
+  \stoppicture}

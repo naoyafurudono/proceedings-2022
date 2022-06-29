@@ -1,0 +1,16 @@
+\placefigure[][fig:task-states]
+  {Possible task conditions and their transitions, where a transition is caused by user interaction ($\interact{\iota}$) for some input $\iota$.}
+  {\startpicture[x=1pc,y=1pc,shorten >=1pt,minimum size=3.5pc,node distance={0.33pc and 3pc},>={Triangle},draw=black,thick]
+    \node[circle,draw,very thick] (running)                            {\emph{Running}};
+    \node[circle,draw,very thick] (failing)   [above left=of running]  {\emph{Failing}};
+    \node[circle,draw,very thick] (stuck)     [above right=of running] {\emph{Stuck}};
+    \node[circle,draw,very thick] (finished)  [below left=of running]  {\emph{Steady}};
+    \node[circle,draw,very thick] (recurring) [below right=of running] {\emph{Unsteady}};
+    %
+    % \draw[thick,->] (running) -- (failing);
+    \draw[->] (running) -- (finished);
+    \draw[->] (running) -- (recurring);
+    \draw[->] (running) -- (stuck);
+    \draw[->] (recurring) edge [out=423,in=387,looseness=6]  (recurring);
+    \draw[->] (running) edge [out=108,in=72,looseness=6]  (running);
+  \stoppicture}

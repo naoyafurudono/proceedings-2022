@@ -1,0 +1,88 @@
+% !TEX root=../main.tex
+
+
+%% Definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% \(re)newmacro{.name.}[.num.][.opt-list.]{.def.} % short by default
+\newcommand*{\newmacro}[1]
+  {\expandafter\newcommandx\expandafter*\csname #1\endcsname}
+\newcommand*{\renewmacro}[1]
+  {\expandafter\renewcommandx\expandafter*\csname #1\endcsname}
+\newcommand*{\providemacro}[1]
+  {\expandafter\providecommandx\expandafter*\csname #1\endcsname}
+
+%% \define[.num.]\name{.def.} % short by default
+\newmacro{define}[2][1={0}]
+  {\newcommandx*#2[#1]}
+
+%% \usemacro{.name.}
+\newmacro{usemacro}[1]
+  {\csname #1\endcsname}
+
+%% \(re)newenvironment{.name.}[.num.][.opt-list.]{.begin.}{.end.} % long by default
+\let\newenvironment\newenvironmentx
+\let\renewenvironment\renewenvironmentx
+\let\provideenvironment\provideenvironmentx
+
+\newmacro{DEPRICATED}
+  {\textbf{DEPRICATED}}
+
+
+%% Tests %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newmacro{isempty}[1]
+  {\equal{#1}{}}
+
+
+%% Gobbling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+{\catcode`\^^M=12 \gdef\gobbleline#1^^M{\endgroup}}
+
+\newmacro{newcomment}[1]
+  {\newmacro{#1}{\begingroup\catcode`\^^M=12 \gobbleline}}
+
+\newmacro{gobbleoneargument}[1]
+  {}
+
+
+%% Math %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% \(re)newmathcommand{.name.}[.cat.]{.def.}
+\newmacro{newmathcommand}[3][2]
+  {\ifthenelse{\isempty{#2}}
+    {\newmacro{#1}{#3}}
+    {\newmacro{#1}{\usemacro{math#2}{#3}}}}
+\newmacro{renewmathcommand}[3][2]
+  {\ifthenelse{\isempty{#2}}
+    {\renewmacro{#1}{#3}}
+    {\renewmacro{#1}{\usemacro{math#2}{#3}}}}
+
+%% \newoperator{.name.}[.lop.]{.def.}
+\newmacro{newoperator}[3][2={limop}]
+  {\ifthenelse{\equal{#2}{nolop}}
+    {\newmacro{#1}{\mathop{#3}\nolimits}}
+    {\newmacro{#1}{\mathop{#3}}}}
+%% \newfunction[.name.]{.fun.}
+\newmacro{newfunction}[2][1]
+  {\ifthenelse{\isempty{#1}}
+    {\newoperator{#2}[limop]{\mathrm{#2}}}
+    {\newoperator{#1}[limop]{\mathrm{#2}}}}
+
+%% \(re)newunary{.name.}{.def.}
+\newmacro{newunary}[1]
+  {\newmathcommand{#1}}
+\newmacro{renewunary}[1]
+  {\renewmathcommand{#1}}
+%% \(re)newbinary{.name.}{.def.}
+\newmacro{newbinary}[1]
+  {\newmathcommand{#1}[bin]}
+\newmacro{renewbinary}[1]
+  {\renewmathcommand{#1}[bin]}
+%% \(re)newrelation{.name.}{.def.}
+\newmacro{newrelation}[1]
+  {\newmathcommand{#1}[rel]}
+\newmacro{renewrelation}[1]
+  {\renewmathcommand{#1}[rel]}
+
+%%NOTE: `\mathrel` gives a single space width between keywords but removes it after another relational operator.
+%%      `\mathop`  gives just a small skip, but doesn't has above bug.

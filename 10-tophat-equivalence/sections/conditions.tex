@@ -1,0 +1,318 @@
+\startcomponent conditions
+\product thesis
+\environment thesislayout
+
+
+\section[sec:conditions]{Task conditions}
+
+For expression equivalence, we needed contexts to determine the equivalence of two lambda functions, whose results can only be observed after evaluation.
+For tasks however, we do not need contexts to view their results.
+A task's value can be determined at any point during execution by using the $\Value$ observation,
+whereupon it either has a value, or it is undefined.
+Note that, we will restrict ourselves to tasks which result in a basic value,
+as these are results which are directly comparable.
+
+On the other hand, tasks do allow user interaction, and depending on what inputs are sent, the resulting task may be different.
+So while lambda functions can produce different results depending on their arguments, so can tasks produce different results depending on what inputs are send to them.
+So, in a sense, for tasks the contexts are user input.
+
+To satisfy Property 1 of \doifthesiselse{this chapter}{\see[sec:contextequiv]},
+which says that programs resulting in values which are observably different must not be equivalent,
+we will use the observations on tasks, as introduced in \see[sec:observations].
+Before we observe a task however, we should first fully fixate the tasks whose equivalence we want to determine.
+We use the fixing semantics ($\fixate$) to ensure that tasks are fully fixated.
+Fixation keeps track of a state $\sigma$.
+For semantic equivalence, we do not want that fixation results in two different states.
+So, given two tasks $t_1, t_2 : \Task\ \beta$, we want that for all states $\sigma$, fixation of $t_1$ and $t_2$ end in the same state $\sigma'$:
+\startformula
+  t_1,\sigma,\nothing \fixate t_1',\sigma' \iff t_2,\sigma,\nothing \fixate t_2',\sigma'
+\stopformula
+
+After fixation, we need to decide what observations $t_1'$ and $t_2'$ must have in common for them to be considered equivalent.
+Let us recall what observations can be made on tasks.
+The value function $\Value$ returns the value $v$ of a task, or $\bot$ if it is undefined;
+there is the failing function $\Failing$ which returns whether a task is failing;
+and there is the inputs function $\Inputs$ which returns the set of all possible input events that a task accepts,
+that is, their \emph{input space}.
+The value and failing functions are used in the normalisation rules of \TOPHAT, and different observations for these functions can result in different derivation rules being triggered.
+Therefore, we can say that tasks for which the value or failing function return a different result must not be semantically equivalent.
+
+Similarly, tasks whose inputs function $\Inputs$ return a different set of input events can also not be semantically equivalent, because that would mean that the types of interaction that can be done with the tasks are different.
+Recall that input events should be named by the same key as the editor it is meant for.
+So if we require that $\Inputs(t_1') = \Inputs(t_2')$,
+then this also implies that $t_1'$ and $t_2'$ must have the same keys for all their editors.
+If this is not the case, we can never have that $\Inputs(t_1') = \Inputs(t_2')$, and the tasks cannot be semantically equivalent.
+
+Given these impressions, we say that at least the following property must hold for $t$ to be equivalent to $t'$:
+\startformula
+   \Failing(t) = \Failing(t') \text{\ and\ } \Value(t,\sigma) = \Value(t',\sigma) \text{\ and\ } \Inputs(t) = \Inputs(t')
+\stopformula
+For any of these task observations, we can distinguish two cases: either a task fails or does not fail, it either has a value or its value is undefined, and it either accepts input or it accepts no more input.
+Based on these case distinctions, we say that a task is in either one of five conditions after fixation.
+% \startdefinition[def:conditions]{Condition}
+%   We use the observations $\Failing$, $\Value$, and $\Inputs$
+%   to define five \emph{conditions} tasks can be in.
+%   \startitemize[n]
+%     \item \cnd{Failing}:
+%       its failing observation is true
+%       \NL $\Failing(n) = \True$;
+%     \item \cnd{Finished (steady)}:
+%       it has a value, but does not accept user input;
+%       \NL $\Value(n,\sigma) = v$ and $\Inputs(n) \eq \emptyset$;
+%     \item \cnd{Finished (recurring)}:
+%       it has a value, and accepts user input
+%       \NL $\Value(n,\sigma) = v$ and $\Inputs(n) \neq \emptyset$;
+%     \item \cnd{Stuck}:
+%       it has no value, and does not accept user input.
+%       \NL $\Value(n,\sigma) = \bot$ and $\Inputs(n) \eq \emptyset$;
+%     \item \cnd{Running}:
+%       it has no value, and accepts user input;
+%       \NL $\Value(n,\sigma) = \bot$ and $\Inputs(n) \neq \emptyset$;
+%   \stopitemize
+%   These conditions, are summarized in \see[tab:conditions],
+%   including some examples tasks falling into that condition.
+% \stopdefinition
+These task conditions, and some examples, are shown in \see[tab:task-conditions].
+In the next subsections, we will discuss each condition in more detail and give some examples.
+
+\placetable[][tab:task-conditions]
+  {Conditions for fixated tasks}% tasks can be in after normalisation}
+  {\doifthesiselse{
+    \starttabulate[|cM|cM|cM|l|lM|]
+      \FL
+      \NC \Failing   \NC \Value     \NC \Inputs    \NC \alert{Condition} \NC \alert{Examples}                                                                                                           \NR
+      \ML
+      \NC \checkmark \NC -          \NC -          \NC Failing           \NC \Fail, \,\, \Fail \Pair \Fail, \,\, \Fail \Choose \Fail, \,\, (\lambda x.x) \Trans \Fail, \,\, \Fail \Step \lambda x.\Lift x \NR
+      \NC -          \NC \checkmark \NC -          \NC Steady            \NC \Lift 2, \,\, \Lift 2 \Pair \Lift 3, \,\, \Lift \tuple{2, 3}, \,\, (\lambda x.x + 1) \Trans \Lift 2                          \NR
+      \NC -          \NC \checkmark \NC \checkmark \NC Unsteady          \NC \Update 2, \,\, \Update 2 \Pair \Update 3, \,\, \Update \tuple{2, 3}                                                       \NR
+      \NC -          \NC -          \NC \checkmark \NC Running           \NC \Enter \Int \Pair \Fail, \,\, \Update 2 \Step \lambda x.\Fail                                                              \NR
+      \NC -          \NC -          \NC -          \NC Stuck             \NC \Lift 2 \Step \lambda x.\Fail, \,\, \Lift 2 \Pair \Fail, \,\, \Fail \Pair \Lift 2                                          \NR
+      % \NC - \NC - \NC \checkmark \NC Running (branching) \NC \Enter \Int \Step \lambda x.\Ite{x \leq 2}{\Lift x}{\Fail} \NR
+      \LL
+    \stoptabulate
+    \noindentation
+    (Checkmarks (\checkmark) for $\Failing$, $\Value$ and $\Inputs$ for a task $t$ and a state $\sigma$ indicate that
+      $\Failing(t) = \True$,
+      $\Value(t, \sigma) = v$ for $v \neq \bot$, and
+      $\Inputs(t) \neq \nothing$ respectively.)
+  }{\input{tbl-conditions-ltx}}}
+
+
+\subsection{Failing tasks}
+
+A \emph{failing} task $t$ is a task for which the failing function $\Failing(t)$ yields true%
+\doifthesis{, as stated before in \see[def:failing-task]}.
+
+In the original \TOPHAT\ paper \cite[conf/ppdp/SteenvoordenNK19],
+Theorem\~6.5 states that a task fails if and only if it accepts no more user input.
+However, with the introduction of the lift combinator ($\Lift$) in \doifthesiselse{this thesis}{Steenvoorden \cite[Steenvoorden22]},
+this is no longer the case.
+For example, $\Lift e$ does not fail, and neither does it accept user input.
+The same holds for read-only editors ($\View,\Watch$).
+What we still can say however, is that if a task is failing, we know that it has no value and accepts no more user input.
+We have proven this property in \see[prp:failing-no-interaction]\doifpaper{ in the appendix}.
+
+% \startconjecture[con:failing]
+%   For all failing tasks $t$ and states $\sigma$, we have that $\Value(t, \sigma) = \bot$ and $\Inputs(t) = \nothing$.
+%   % Furthermore, $t$ cannot be further fixated.
+%   % That is, for all states $\sigma$, we have that $t,\sigma,\nothing \fixate t,\sigma$.
+%   % A failing task $t$ has no value and accepts no user input:
+%   % $$\forall t \in \mathrm{Tasks}: \Failing(t) \rightarrow (\forall \sigma \in \mathrm{States}: \Value(t,\sigma) = \bot) \wedge \Inputs(t) = \nothing$$
+% \stopconjecture
+
+% \startconjecture[con:n-failing]
+%   A failing task $t$ is fully fixated:
+%   $$\Failing(t) \Rightarrow \forall \sigma \in \mathrm{States}: t,\sigma,\nothing \fixate t,\sigma$$
+% \stopconjecture
+
+\startproposition[prp:failing-stays-failing]{Failing tasks stay failing}
+  If $t$ is a failing task, then it stays failing.
+  Or, more formally:
+  for all fixated tasks $t : \Task\ \tau$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $\Failing(t)$,
+  \NL there is no input $\iota$ such that $t,\sigma \interact{\iota} t',\sigma''$.
+\stopproposition
+
+\startproof
+  Once a task fails, it will always remain failing,
+  because by \see[cor:failing-tasks-no-handling] \doifpaper{from the appendix} no more user interaction is possible, and by assumption, the task is already fixated.
+\stopproof
+
+Failing can thus be regarded as one type of termination, and we will consider all tasks that fail to be equivalent.
+Hence, we will say that the tasks $\Fail$, $\Fail \Pair \Fail$, $\Fail \Choose \Fail$, $(\lambda x.\ x) \Trans \Fail$, $\Fail \Step \lambda x.\ \View x$, and all other failing tasks, are semantically equivalent to each other.
+
+
+\subsection{Finished tasks}
+
+A \emph{finished} task $t$ is a task which yields a value $\Value(t,\sigma) = v$ for $v \neq \bot$.
+This value can either be \emph{steady} when no more user input is possible, or \emph{unsteady} when the task still accepts user input.
+An example of a finished task with a steady value is the task $\View^k 42$.
+Because this task accepts no more user input, its value will always remain equal to $42$.
+An example of a finished task with an unsteady value is the task $\Update^k 42$.
+This task still accepts user input, and thus its value can keep on changing.
+Even though both tasks yield the same value, they should not be equivalent, since one's value can be changed and the other one's value cannot.
+\doifthesis{We extend \see[def:finished] in the following way.}
+\startdefinition[def:finished-task]{Finished, steady, and unsteady task}
+  We call a fixated task $t : \Task\ \tau$ in state $\sigma$ \emph{finished} if and only if $\Value(t,\sigma) = v$, for $v \neq \bot$.
+  Furthermore, we call a finished task \emph{steady} if and only if $\Inputs(t) = \nothing$, and \emph{unsteady} in the other case.
+\stopdefinition
+
+A steady task can thus never be semantically equivalent to an unsteady task, even if their values are (initially) the same.
+But just looking at the resulting values, and whether the resulting value is steady or not, is not enough to determine semantic equivalence of finished tasks.
+Consider for example the following tasks:
+\startformulas[spread]
+  \NC t_1 \NC:=\NC \View \tuple{2, 3}      \NC   t_3 \NC:=\NC \Update^{k_1} \tuple{2, 3}            \NR
+  \NC t_2 \NC:=\NC \View 2 \Pair \View 3   \NC   t_4 \NC:=\NC \Update^{k_1} 2 \Pair \Update^{k_2} 3 \NR
+\stopformulas
+
+These are all finished tasks with value $\tuple{2, 3}$.
+Tasks $t_1$ and $t_2$ are both steady, and thus $t_1 \taskequiv t_2$.
+We have already concluded that steady tasks cannot be equivalent to unsteady tasks, so $t_1 \ntaskequiv t_3$, $t_1 \ntaskequiv t_4$, $t_2 \ntaskequiv t_3$, and $t_2 \ntaskequiv t_4$.
+But we will also say that $t_3 \ntaskequiv t_4$, because we have that:
+\startformulas[align]
+  \NC \Inputs(t_3) \NC=\NC \set{k_1!b_1 \mid b_1: \Int \times \Int}                         \NR
+  \NC \Inputs(t_4) \NC=\NC \set{k_1!b_1 \mid b_1 : \Int} \cup \set{k_2!b_2 \mid b_2 : \Int} \NR
+\stopformulas
+\noindentation
+Meaning that the types of interaction that can be done with $t_3$ differ from the types of interaction that can be done with $t_4$.
+In the case of $t_3$, the user can only alter the pair in one go, whereas for $t_4$, the user can partially update it.
+So for finished tasks, we also need to require that $\Inputs(t) = \Inputs(t')$ if we want to conclude that $t \taskequiv t'$.
+
+And yet this is still not enough...
+Consider the following two tasks:
+\startformulas[align]
+  \NC t_5 \NC:=\NC (\lambda x.\ \Ite{x < 0}{-x}{x}) \Trans \Update^k 42 \NR
+  \NC t_6 \NC:=\NC \Update^k 42                                         \NR
+\stopformulas
+\noindentation
+Both tasks have the value $42$ and accept the same input.
+However for negative values, the resulting values diverge, because the transform function in task $t_5$ ensures that its output is always positive.
+So if a task still accepts user input, not only do we need to look at a task's current value, but we also need to consider all values that a task can have after user interaction.
+
+We will regard finished tasks as another type of condition a task can be in after fixation.
+Of course, if the value is unsteady, the task is not terminated in the true sense of the word, since there is still user interaction possible.
+In fact, the task will never terminate: a finished task will always remain a finished task with the same input space, only its value may change.
+
+\startproposition[prp:finished-stays-finished]{Finished tasks stay finished}
+  If $t$ is a finished task, then for all inputs $\iota \in \Inputs(t)$: if $t,\sigma \interact{\iota} t',\sigma'$, then $t'$ is again a finished task.
+  Moreover, we also have that $\Inputs(t') = \Inputs(t)$.
+\stopproposition
+
+\startproof
+  Because $t$ is finished, it is fixated and has a value by \see[def:finished-task].
+  Therefore, by \see[prp:valued-means-static]\doifpaper{ from the appendix}, we know that $t$ is a \emph{static} task.
+  That is, it is a task which does not change the combinators it utilises.
+  Using the properties of static tasks, as proved in \doifthesiselse{\see[sec:interplay]}{the appendix},
+  we know $t$ stays static by \see[cor:static-stays-static],
+  and its inputs will stay the same over interactions by \see[cor:static-keeps-input].
+\stopproof
+
+% NOT TRUE!
+% We also claim that for finished tasks, it is enough to consider all values after a single input event, and that we do not need to
+% For finished unsteady tasks, we claim that it is enough to
+% \towrite{...}
+% \towrite{Lemma: If $\Value(t,\sigma) = v$ for $v \neq \bot$, then for all $i \in \Inputs(t)$: if $t,\sigma \interact{i} t',\sigma'$ then $\Value(t',\sigma') = v'$ with $v' \neq \bot$ and $\Inputs(t) = \Inputs(t')$. I.e.: a finished task will always remain finished with the same input space, only its value may change.}
+% \startconjecture[con:finished2]
+%   If $t$ is a finished task, then for all valid input sequences $I$ with $I = i_0, ..., i_n$:
+%   %
+%   $$t,\sigma \interact{I} t',\sigma' \iff t,\sigma \interact{i_n} t',\sigma'$$
+% \stopconjecture
+
+
+\subsection{Stuck tasks}
+
+A \emph{stuck} task $t$ is a task which does not fail, does not have a value, and does not accept user input.
+% Such tasks are essentially broken.
+Examples of stuck tasks are $\View 2 \Step \lambda x.\ \Fail$, $\View 2 \Pair \Fail$, and $\Fail \Pair \View 2$.
+The first example is stuck because the right-hand side always fails, and thus the step can never be taken.
+For pairing, we have that both sides must fail before $\Pair$ fails, and both sides must have a value before $\Pair$ has a value.
+So, if one side fails and the other side has a value, then neither observation is true, and the task is stuck.
+
+\startdefinition{Stuck task}
+  We call a fixated task $t : \Task\ \tau$ in state $\sigma$ \emph{stuck} if and only if $\neg \Failing(T)$, $\Value(t,\sigma) = \bot$, and $\Inputs(t) = \nothing$.
+\stopdefinition
+
+A stuck task will always remain stuck, because no more user interaction is possible, and by assumption it is already fully fixated.
+\startproposition[cor:stuck-stays-stuck]{Stuck tasks stay stuck}
+  If $t$ is a stuck task, then it stays stuck.
+  Or, more formally:
+  for all fixated tasks $t : \Task\ \tau$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $\Inputs(t) = \nothing$,
+  \NL there is no input $\iota$ such that $t,\sigma \interact{\iota} t',\sigma'$.
+\stopproposition
+
+Similar to failing, we will consider stuck tasks as another type of termination, and we will say that all stuck tasks are semantically equivalent to each other.
+
+
+\subsection{Running tasks}
+
+A \emph{running} task $t$ is a task which does not fail, does not have a value, but still accepts user input.
+Because there is still user interaction possible, it may be the case that with the right input, it transitions to one of the previously described task conditions.
+The simplest example of a running task is the empty editor $\Enter^k \beta$, which becomes a finished (unsteady) task once it receives a valid input event.
+There also exist running tasks that only transition to another task condition for some inputs, or for no inputs at all.
+For example, the tasks $\Enter^k \Int \Step \lambda x.\ \Fail$, $\Enter^k \Pair \Fail$, and $\Fail \Pair \Update^k 2$ are all running tasks which will forever remain running;
+and the task $\Enter^k \Int \Step \lambda x.\ \Ite{x \leq 2}{\View x}{\Fail}$ will only transition to another task condition for some inputs, but not for others.
+
+\startdefinition{Running task}
+  We call a fixated task $t : \Task\ \tau$ in state $\sigma$ \emph{running}
+  if and only if $\neg \Failing(T)$, $\Value(t,\sigma) = \bot$, and $\Inputs(t) \neq \nothing$.
+\stopdefinition
+
+To determine the equivalence of two running tasks, we therefore need to look at all possible user interactions, and check that they affect the two tasks in the same way.
+To do this, we need a way to talk about sequences of input events, instead of just single input events.
+We give the following definition for this:
+
+\startdefinition[def:input-seq]{Input sequences}
+  An input sequence $I = \iota_1 \cdot \ldots \cdot \iota_j$ is a finite sequence of input events.
+  Given a task $t_0 : \Task\ \tau$ and a state $\sigma_0$, we say that $I$ is a \emph{valid} input sequence for $t_0$ in $\sigma_0$ if and only if:
+  \startformula
+    t_0,\sigma_0 \interact{\iota_1} t_1,\sigma_1 \interact{\iota_2} \ldots \interact{\iota_j} t_{j},\sigma_{j}
+  \stopformula
+  with $\iota_i \in \Inputs(t_{i-1})$, for all $\iota \in \{1, \ldots, j\}$.
+
+  We will use the shorthand notation $t_0,\sigma_0 \execute{I} t_{j},\sigma_{j}$ to denote the above derivation.
+  We also consider the empty input sequence, denoted by $\epsilon$, to be a valid input sequence,
+  and for all tasks $t$ and states $\sigma$ we have that: $t,\sigma \execute{\epsilon} t,\sigma$.
+\stopdefinition
+
+We will make a distinction between running tasks that forever remain running, no matter what inputs you send to it;
+and running tasks for which there exists at least one input sequence which escapes, i.e. which transitions to another task condition.
+We will call the former class \emph{looping} tasks, and the latter class \emph{branching} tasks, formally:
+
+\startdefinition{Looping and branching}
+  We call a running task $t : \Task\ \tau$ in state $\sigma$ \emph{looping} if and only if for all valid input sequences $I$
+  we have that $t,\sigma \execute{I} t',\sigma'$ and $t'$ is again a running task.
+  If there exists at least one valid input sequence for which $t'$ is not a running task, then we call $t$ \emph{branching}.
+\stopdefinition
+
+For branching tasks, it is possible to transition to either a finished or a stuck task condition.
+Take for example the task $\Enter^k \Int \Step \lambda x.\ t$, which is a running task that transitions to $t$ after a valid input event.
+So long as $t$ is not failing, the step can be taken, and so $t$ can be any non-failing task.
+It is also possible that for some input events, it transitions to one task condition, and for others, that it transitions to a different task condition.
+For example the task $\Enter^k \Int \Step \lambda x.\ \Ite{x \leq 2}{t}{t'}$ transitions to $t$ for some inputs, and to $t'$ for other inputs.
+However, a running task can never transition to a failing task.
+
+\startproposition[prp:running-not-to-failing]{Running tasks will not fail}
+  If $t : \Task\ \tau$ is a running task,
+  then for all states $\sigma$ and for all valid input sequences $I$,
+  we have that
+  \NL if $t,\sigma \execute{I} t',\sigma'$
+  \NL then $\neg \Failing(t')$.
+\stopproposition
+
+\startproof
+  By assumption $t$ is running, and therefore itself not failing,
+  and by the definition of the normalisation rules, $t$ cannot make a transition to a failing task.
+\stopproof
+
+We say that two running tasks $t_1$ and $t_2$ in state $\sigma$ are semantically equivalent if for all valid input sequences $I$
+we have that $t_1,\sigma \interact{I} t_1',\sigma' \iff t_2,\sigma \interact{I} t_2',\sigma'$, with $\Value(t_1',\sigma') = \Value(t_2',\sigma')$, and $\Inputs(t_1') = \Inputs(t_2')$.
+That is, for all possible user interactions, $t_1$ and $t_2$ are not observably different.
+Because of \see[prp:running-not-to-failing], we do not need to check whether the tasks fail or not.
+
+
+\stopcomponent
