@@ -1,0 +1,463 @@
+\newcommand{\LambdaszType}{
+\begin{figure}
+
+\lefttext{Syntax of Types and Effects}
+\begin{align*}
+A, B &::= \basety \mid \carrowty{A}{C} && \text{Value Types} \\
+C, D, E &::= \cty{A}{\epsilon} && \text{Computation Types} \\
+\epsilon &::= \mteff \mid \conseff{A}{\epsilon} && \text{Effects}
+\end{align*}
+
+\lefttext{Typing Rules}
+
+\[
+\typing{x : A \in \Gamma}
+       {\judgev{\Gamma}{x}{A}}
+       {Var}
+\qquad
+\typing{\judgec{\extenv{\Gamma}{x}{A}}{M}{C}}
+       {\judgev{\Gamma}{\abs{x}{M}}{\carrowty{A}{C}}}
+       {Abs}
+\qquad
+\typing{\judgev{\Gamma}{V}{A}}
+       {\judgee{\Gamma}{\ret{V}}{A}{\epsilon}}
+       {Return}
+\]
+
+\[
+\typing{\judgev{\Gamma}{V}{\carrowty{A}{C}} \quad
+        \judgev{\Gamma}{W}{A}}
+       {\judgec{\Gamma}{\app{V}{W}}{C}}
+       {App}
+\qquad
+\typing{\judgee{\Gamma}{M}{A}{\epsilon} \quad
+        \judgee{\extenv{\Gamma}{x}{A}}{N}{B}{\epsilon}}
+       {\judgee{\Gamma}{\letin{x}{M}{N}}{B}{\epsilon}}
+       {Let}
+\]
+
+\[
+\typing{\judgee{\extenv{\Gamma}{k}{\earrowty{A}{B}{\epsilon}}}
+               {M}{B}{\epsilon}}
+       {\judgee{\Gamma}{\shiftz{k}{M}}{A}{(\conseff{B}{\epsilon})}}
+       {Shift0}
+\qquad
+\typing{\begin{trgather}
+        \judgee{\Gamma}{M}{A}{(\conseff{B}{\epsilon})} \\
+        \judgee{\extenv{\Gamma}{x}{A}}{N}{B}{\epsilon}
+        \end{trgather}}
+       {\judgee{\Gamma}{\dollarret{M}{x}{N}}{B}{\epsilon}}
+       {Dollar}
+\]
+
+\caption{Type System of \lambdasz}
+\label{fig:lambdasztype}
+\end{figure}
+}
+
+\newcommand{\LambdahType}{
+\begin{figure}
+
+\lefttext{Syntax of Types and Effects}
+\begin{align*}
+A, B &::= \basety \mid \carrowty{A}{C} && \text{Value Types} \\
+C &::= \cty{A}{\epsilon} && \text{Computation Types} \\
+\epsilon &::= \pureeff \mid \effp{A}{B} && \text{Effects} \\
+\end{align*}
+
+\lefttext{Typing Rules}
+
+\[
+\typing{\judgev{\Gamma}{V}{A}}
+       {\judgee{\Gamma}{\doop{V}}{B}{\effp{A}{B}}}
+       {Do}
+\qquad
+\typing{\begin{trgather}
+        \judgee{\Gamma}{M}{A}{\effp{\Apr}{\Bpr}} \\
+        \judgec{\extenv{\Gamma}{x}{A}}{M_r}{C} \\
+        \judgec{\extenvtwo{\Gamma}{x}{\Apr}{k}{\carrowty{\Bpr}{C}}}
+               {M_h}{C}
+        \end{trgather}}
+       {\judgec{\Gamma}{\handle{M}{x}{M_r}{x}{k}{M_h}}{C}}
+       {Handle}
+\]
+
+\caption{Type System of \lambdah
+(rules for $\lambda$-terms are the same as Figure~\ref{fig:lambdasztype})}
+\label{fig:lambdahtype}
+\end{figure}
+}
+
+\newcommand{\TyEff}{
+\begin{figure}
+
+\begin{align*}
+A, B &::= \basety \mid \carrowty{A}{C} && \text{Value Types} \\
+C, D &::= \cty{A}{C} && \text{Computation Types} \\
+\epsilon &::= \pureeff \mid \effc{A}{B}{C} && \text{Effects}
+\end{align*}
+
+\caption{Syntax of \lambdah Effects and Types}
+\label{fig:tyeff}
+\end{figure}
+}
+
+\section{Deriving a Type System from the CPS Translation}
+\label{sec:type2}
+
+The traditional approach to designing a type system for control operators
+is to analyze their CPS translation~\cite{danvy-context}, which exposes
+the typing constraints of each syntactic construct.
+In the case of \shiftztt and dollar, the CPS translation gives rise to a
+stack-like representation of effects, reflecting the ability of \shiftztt
+to capture metacontexts~\cite{materzok-subtyping,materzok-hierarchy}.
+
+Unlike control operators, the type system of effect handlers has been
+designed independently of the CPS translation.
+Indeed, the first type system of effect handlers~\cite{bauer-effsys} was
+proposed before the first CPS translation~\cite{hillerstrom-cps}.
+This brings up a question: What would we obtain if we derive the type system
+of effect handlers from their CPS translation?
+
+In this section, we derive the type system of effect handlers following
+the recipe of Danvy and Filinski~\cite{danvy-context}, which consists of
+two steps:
+
+\begin{enumerate}
+\item Annotate the CPS image of each construct in the most general way
+\item Encode the identified typing constraints into the typing rules
+\end{enumerate}
+
+\noindent We show that, when guided by the CPS translation, we obtain a
+type system with explicit answer types and a restricted form of
+answer-type modification~\cite{danvy-context}.
+In what follows, we review the existing type systems of \shiftztt/dollar
+and effect handlers (Sections~\ref{sec:type2:shiftz} and
+\ref{sec:type2:handler}), design a new type system of effect handlers by
+applying the CPS approach (Section~\ref{sec:type2:cps}), and prove the
+soundness of the type system (Section~\ref{sec:type2:sound}).
+
+
+\subsection{Type System of Shift0 and Dollar}
+\label{sec:type2:shiftz}
+
+In Figure~\ref{fig:lambdasztype}, we present the type system of \lambdasz.
+The type system is adopted from Hillerstr\"om et al~\cite{hillerstrom-cps}
+(for $\lambda$-terms) and Forster et al.~\cite{forster-jfp} (for \shiftztt
+and dollar).
+There are two classes of types: value types ($A, B$) and computation types
+($C, D$).
+The latter take the form $\cty{A}{\epsilon}$, which reads: the computation
+returns a value of type $A$ while possibly performing an effect represented
+by $\epsilon$\footnote{In the original type system of Forster et
+al.~\cite{forster-jfp}, effects are attached to the typing judgment
+instead of being part of a computation type.}.
+An effect is a list of \textit{answer types}, representing what kind of
+context is needed to evaluate a computation\footnote{The effect
+representation does not allow \textit{answer-type modification}.
+A more general (and involved) type system supporting answer-type
+modification is given by Materzok and Biernacki~\cite{materzok-hierarchy}.}.
+The list is extended by \rulename{Shift0} (which requires a specific kind
+of context) and shrunk by \rulename{Dollar} (which supplies the required
+context).
+
+\LambdaszType
+
+
+\subsection{Type System of Effect Handlers}
+\label{sec:type2:handler}
+
+In Figure~\ref{fig:lambdahtype}, we present the type system of \lambdah.
+The type system is adopted from Hillerstr\"om et al.~\cite{hillerstrom-cps}.
+We again have value and computation types.
+An effect is either the pure effect $\pureeff$ or an operation type
+$\oparrowty{A}{B}$; the latter tells us what kind of handler is needed to
+evaluate a computation.
+Operation types are introduced by \rulename{Do} (which requires a specific
+kind of operation clause) and eliminated by \rulename{Handle} (which supplies
+the required operation clause).
+The typing rules for $\lambda$-terms stay the same as those of \lambdasz,
+because they do not modify effects.
+
+\LambdahType
+
+
+\subsection{Applying the CPS Approach}
+\label{sec:type2:cps}
+
+The type system in Figure~\ref{fig:lambdahtype} is defined on the 
+direct-style expressions in \lambdah.
+We now design a new type system based on the CPS translation.
+As we saw in Section~\ref{sec:cps}, a CPS-translated \lambdah computation
+is a function that receives a return continuation and an effect continuation.
+Among the two arguments, a return continuation takes in a value and an 
+effect continuation, whereas an effect continuation takes in an operation 
+argument and a resumption (a continuation whose handler is already given).
+Hence, if we annotate the CPS image of a computation in the most general
+way, we obtain something like this:
+
+\im{
+\abstwo{k^{\parrowtytwo{A}
+                       {(\parrowtytwo{A_1}{(\parrowty{B_1}{C_1})}{D_1})}
+                       {E_1}}}
+       {h^{\parrowtytwo{A_2}{(\parrowty{B_2}{C_2})}{D_2}}}
+       {e^{E_2}}
+}
+
+\noindent These annotations are however too general.
+The semantics of deep handlers naturally gives rise to the following
+invariants.
+
+\begin{enumerate}
+\item The types $\parrowtytwo{A_1}{(\parrowty{B_1}{C_1})}{D_1}$ and
+  $\parrowtytwo{A_2}{(\parrowty{B_2}{C_2})}{D_2}$ of the two effect 
+  continuations are the same.
+  This is because a computation and its continuation are evaluated under
+  the same handler (when handlers are deep).
+
+\item The return type $E_1$ of the return continuation and the return type
+  $C_2$ of the resumption are the same.
+  This is because a resumption is constructed using a return continuation.
+
+\item The type $E_2$ of the eventual answer must be either $C_2$ or $D_2$.
+  This is because the answer is produced by the return or the operation 
+  clause of the surrounding handler.
+\end{enumerate}
+
+\noindent These invariants lead to the following refined annotations.
+
+\im{
+\abstwo{k^{\parrowtytwo{A}
+                       {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                       {C}}}
+       {h^{\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D}}}
+       {e^{E}}
+\qquad \text{where } E = C \text{ or } D
+}
+
+\noindent The annotations have six different types.
+Among them, $\Apr$, $\Bpr$, $C$, $D$, and $E$ specify the kind of the
+handler required by the computation, as well as the kind of answer to be  
+produced by the handler.
+By including these types in non-empty effects, we arrive at the following
+effect representation.
+
+\begin{align*}
+\epsilon &::= \pureeff \mid \atmeff{A}{B}{C}{D}{E}
+\qquad \text{where } E = C \text{ or } D
+\end{align*}
+
+\noindent Here, $\atmeff{A}{B}{C}{D}{E}$ carries the following information.
+
+\begin{itemize}
+\item The computation may perform an operation of type $\oparrowty{A}{B}$.
+\item When evaluated under a handler whose return clause has type $C$ and
+  whose operation clause has type $D$, the computation returns an answer
+  of type $E$ (which must be either $C$ or $D$).
+\end{itemize}
+
+Using this representation of effects, we design the typing rules for
+\lambdah computations and values.
+We do this by annotating the CPS image of individual syntactic constructs
+and converting annotated expressions into typing derivations.
+
+\paragraph{Return Expressions}
+
+We begin by annotating the CPS image of a \returntt expression.
+To make the calculation of types easier to follow, we explicitly write the
+effect continuation $h$.
+
+\im{
+\abstwo{k^{\parrowtytwo{A}
+                       {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                       {C}}}
+       {h^{\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D}}}
+    {(\apptwo{k}{\cpsv{V}^A}{h})^C}
+}
+
+\noindent The trivial use of the continuation forces the type of the eventual
+answer to be $C$ (corresponding to invariant 3 mentioned above).
+From this annotated expression, we obtain the following typing rule.
+
+\im{
+\typing{\judgev{\Gamma}{V}{A}}
+       {\judgeatm{\Gamma}{\ret{V}}{A}{\Apr}{\Bpr}{C}{D}{C}}
+       {Return}
+}
+
+\paragraph{Application}
+
+We next annotate the CPS image of an application.
+
+\im{
+(\app{\cps{V}^{\parrowty{A}{C}}}{\cps{W}^A})^C
+}
+
+\noindent The annotations simply tell us that the effect of an application
+comes from the body of the function.
+This corresponds to the following typing rule.
+
+\im{
+\typing{\judgev{\Gamma}{V}{\carrowty{A}{C}} \quad
+        \judgev{\Gamma}{W}{A}}
+       {\judgec{\Gamma}{\app{V}{W}}{C}}
+       {App}
+}
+
+\paragraph{Let Expressions}
+
+Having analyzed application, we consider the \lettt expression.
+
+\bigskip
+
+$\lambda k^{\parrowtytwo{B}
+           {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+           {C}}.$ \\
+\vspace{1mm} \qquad
+$\cps{M}^{\parrowtytwo{(\parrowtytwo{A}{(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}{C})}
+                      {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                      {E}}$ \\
+\vspace{1mm} \qquad
+$(\abs{x^A}{\app{\cps{N}^{\parrowtytwo{(\parrowtytwo{B}{(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}{C})}
+                                      {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                                      {C}}}
+                {k}})$
+
+\bigskip
+
+\noindent The sequencing of $M$ and $N$ forces the eventual answer type of
+$N$ to be $C$.
+The application of $\cps{M}$ then forces the eventual answer type of the 
+entire construct to be $E$.
+The corresponding typing rule is as follows.
+
+\im{
+\typing{\judgeatm{\Gamma}{M}{A}{\Apr}{\Bpr}{C}{D}{E} \quad
+        \judgeatm{\extenv{\Gamma}{x}{A}}{N}{B}{\Apr}{\Bpr}{C}{D}{C}}
+       {\judgeatm{\Gamma}{\letin{x}{M}{N}}{B}{\Apr}{\Bpr}{C}{D}{E}}
+       {Let}
+}
+
+\paragraph{Operations}
+
+We now move on to the case of an operation call.
+
+\im{
+\abstwo{k^{\parrowtytwo{\Bpr}
+                       {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                       {C}}}
+       {h^{\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D}}}
+       {(\apptwo{h}{\cpsv{V}}{(\abs{x^A}{\apptwo{k}{x}{h}})})^D}
+}
+
+\noindent The application of $h$ forces the eventual answer type to be
+$D$ (invariant 3).
+The application $\apptwo{k}{x}{h}$ restricts the annotations in two ways:
+(i) the handler type of the whole expression and that of $k$ must coincide
+(invariant 1); and (2) the return type of $k$ and that of the resumption
+must coincide (invariant 2).
+Below is the derived typing rule.
+
+\im{
+\typing{\judgev{\Gamma}{V}{\Apr}}
+       {\judgeatm{\Gamma}{\doop{V}}{\Bpr}{\Apr}{\Bpr}{C}{D}{D}}
+       {Do}
+}
+
+\paragraph{Handlers}
+
+Lastly, we consider the case of a handler.
+
+\bigskip
+
+$\cps{M}^{\parrowtytwo{(\parrowtytwo{A}{(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}{C})}
+                      {(\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D})}
+                      {E}}$ \\
+\vspace{1mm} \hspace*{3mm} $(\abstwo{x^A}{h^{\parrowtytwo{\Apr}{(\parrowty{\Bpr}{C})}{D}}}{\cps{e_r}^{C}})$ \\
+\vspace{1mm} \hspace*{3mm} $(\abstwo{x^{\Apr}}{k^{\parrowty{\Bpr}{C}}}{\cps{e_h}^{D}}))^{E}$
+
+\bigskip
+
+\noindent The construction requires the effect of the handled expression $M$
+and the type of the two clauses of the handler to be consistent.
+Thus we obtain the following typing rule.
+
+\im{
+\typing{\begin{trgather}
+        \judgeatm{\Gamma}{M}{A}{\Apr}{\Bpr}{C}{D}{E} \\
+        \judgec{\extenv{\Gamma}{x}{A}}{M_r}{C} \\
+        \judgec{\extenvtwo{\Gamma}{x}{\Apr}{k}{\carrowty{\Bpr}{C}}}
+               {M_h}{D}
+        \end{trgather}}
+       {\judgec{\Gamma}{\handle{M}{x}{M_r}{x}{k}{M_h}}{E}}
+       {Handle}
+}
+
+\paragraph{Values}
+
+Let us complete the development by giving the typing rules for variables
+and abstractions.
+These are derived straightforwardly from the CPS translation on values.
+The only thing that is non-standard is the well-formedness condition
+$\judgety{A}$ in the \rulename{Var} rule.
+Here, well-formedness means every function type that appears in a type
+takes the form
+$\carrowty{A}{\catmty{B}{\Apr}{\Bpr}{C}{D}{C}}$ or
+$\carrowty{A}{\catmty{B}{\Apr}{\Bpr}{C}{D}{D}}$.
+
+\im{
+\typing{x : A \in \Gamma \quad \judgety{A}}
+       {\judgev{\Gamma}{x}{A}}
+       {Var}
+\qquad
+\typing{\judgec{\extenv{\Gamma}{x}{A}}{M}{C}}
+       {\judgev{\Gamma}{\abs{x}{M}}{\carrowty{A}{C}}}
+       {Abs}
+}
+
+Through this exercise, we obtained a type system that is different from
+the one presented in Figure~\ref{fig:lambdahtype}.
+First, the type system explicitly keeps track of answer types.
+Second, the type system allows a form of answer-type
+modification~\cite{danvy-context,asai-printf,kobori-atm}.
+Answer-type modification is the ability of an effectful computation to
+change the return type of its delimited context.
+In our setting, this ability is gained by allowing the return and operation
+clauses of a handler to have different types.
+
+The answer-type modification supported in this type system is however very
+limited.
+Specifically, it does not allow answer-type modification in a captured
+continuation.
+In fact, we have already seen where this restriction comes from: the \lettt
+expression.
+Recall that, in the typing rule \rulename{Let}, the body $N$ of \lettt
+(which corresponds to the continuation of $M$) has a type of the form
+$\cty{B}{\atmeff{\Apr}{\Bpr}{C}{D}{C}}$.
+This means $N$ must be a pure computation (which is eventually handled by
+the return clause of type $C$) or it must be handled by a handler whose
+return and operation clauses have the same type (i.e., $C = D$).
+
+
+\subsection{Soundness}
+\label{sec:type2:sound}
+
+The type system we derived from the CPS translation is sound.
+We state this property as the following theorem.
+
+\begin{theorem}[Soundness of Type System]
+\label{thm:soundtype}
+If $\judgec{\Gamma}{M}{\cty{A}{\pureeff}}$, then $M \reduce \ret{V}$,
+and $\judgev{\Gamma}{V}{A}$.
+\end{theorem}
+
+\begin{proof}
+The statement is witnessed by a CPS interpreter\footnote{The interpreter is
+available at \url{https://github.com/YouyouCong/tfp22}.}
+written in the Agda programming language~\cite{norell-phd}.
+The interpreter takes in a well-typed \lambdah computation and returns
+a fully-evaluated Agda value.
+The signature of the interpreter corresponds exactly to the statement of
+soundness, and the well-typedness of the interpreter implies the validity
+of the statement.
+\end{proof}

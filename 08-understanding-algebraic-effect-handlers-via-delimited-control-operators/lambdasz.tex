@@ -1,0 +1,109 @@
+\newcommand{\Lambdasz}{
+\begin{figure}[t]
+
+\lefttext{Syntax}
+\begin{align*}
+V, W &::= x \mid \abs{x}{M} && \text{Values} \\
+M, N &::= \ret{V} \mid \app{V}{V} \mid \letin{x}{M}{M} \mid
+       \shiftz{k}{M} \mid \dollarret{M}{x}{M} && \text{Computations}
+\end{align*}
+
+\medskip
+
+\lefttext{Evaluation Contexts}
+\begin{align*}
+E &::= \hole \mid \letin{x}{E}{M} \mid \dollarret{E}{x}{M} 
+  && \text{General Contexts} \\
+F &::= \hole \mid \letin{x}{F}{M} 
+  && \text{Pure Contexts}
+\end{align*}
+
+\medskip
+
+\lefttext{Reduction}
+\begin{align*}
+E[\app{(\abs{x}{M})}{V}]
+  &\reduce E[\subst{M}{x}{V}]
+  && \rulename{$\beta_v$} \\
+  E[\letin{x}{\ret{V}}{M}]
+  &\reduce E[\subst{M}{x}{V}]
+  && \rulename{$\zeta_v$} \\
+  E[\dollarret{\ret{V}}{x}{M}]
+  &\reduce E[\subst{M}{x}{V}]
+  && \rulename{$\beta_{\$}$} \\
+  E[\dollarret{F[\shiftz{k}{M}]}{x}{N}]
+  &\reduce E[\subst{M}{k}{\abs{y}{\dollarret{F[\ret{y}]}{x}{N}}}]
+  && \rulename{$\beta_{\shiftzsym}$}
+\end{align*}
+
+\caption{Syntax and Reduction Rules of \lambdasz}
+\label{fig:lambdasz}
+\end{figure}
+}
+
+\section{\lambdasz: A Calculus of Shift0 and Dollar}
+\label{sec:lambdasz}
+
+\setcounter{footnote}{0}
+
+As a calculus of control operators, we consider a minor variation of
+Forster et al.'s calculus of \shiftztt and dollar~\cite{forster-jfp},
+which we call \lambdasz.
+In Figure~\ref{fig:lambdasz}, we present the syntax and reduction rules
+of \lambdasz.
+The calculus differs from that of Forster et al. in that it is formalized
+as a fine-grain call-by-value calculus~\cite{levy-finegrain} instead of
+call-by-push-value~\cite{levy-cbpv}.
+This means (i) functions are classified as values; and (ii) computations
+must be explicitly sequenced using the \lettt expression.
+The fine-grain syntax simplifies the CPS translation and type system
+developed in later sections.
+
+Among the control constructs, $\shiftz{k}{M}$ (pronounced ``shift'')
+captures a continuation surrounding itself.
+The other construct $\dollarret{M}{x}{N}$ (pronounced ``dollar'') computes
+the main computation $M$ in a delimited context that ends with the
+continuation $N$\footnote{The dollar operator was originally proposed by 
+Kiselyov and Shan~\cite{kiselyov-substructural}.
+In their formalization, the construct takes the form $\dollar{N}{M}$,
+where $M$ is the main computation and $N$ is an arbitrary expression
+representing an ending continuation.
+We use the bracket notation of Forster et al., restricting $N$ to be an 
+abstraction $\abs{x}{N}$.
+This makes it easier to compare dollar with effect handlers.}.
+
+There are two reduction rules for the control constructs.
+If the main computation of dollar evaluates to a value $V$, the whole
+expression evaluates to the ending continuation $N$ with $V$ bound to $x$
+(rule \rulename{$\beta_\$$}).
+If the main computation of dollar evaluates to $F[\shiftz{k}{M}]$, where $F$ 
+is a pure evaluation context that has no dollar surrounding a hole, the whole 
+expression evaluates to $M$ with $k$ being the captured continuation
+$\abs{y}{\dollarret{F[\ret{y}]}{x}{N}}$
+(rule \rulename{$\beta_{\shiftzsym}$}).
+Notice that the continuation includes the dollar construct that was
+originally surrounding the \shiftztt operator.
+This design is shared with the \shifttt operator of Danvy and
+Filinski~\cite{danvy-abstracting}.
+Notice next that the body of \shiftztt is evaluated without being surrounded
+by the original dollar.
+This differentiates \shiftztt from \shifttt, and allows \shiftztt to capture
+a \textit{meta-context}\footnote{To see what a meta-context is, consider the 
+following program:
+
+\vspace{-2mm}
+
+\im{\dollarret{2 * 
+      \dollarret{1 + 
+        \shiftz{k_1}{\shiftz{k_2}{\app{k_2}{3}}}}
+      {x}{\ret{x}}}
+    {x}{\ret{x}}
+    \reduces 6}
+
+\noindent The first \shiftztt operator captures the delimited context 
+$\dollarret{1 + \hole}{x}{\ret{x}}$, whereas the second one captures the 
+meta-context $\dollarret{2 * \hole}{x}{\ret{x}}$ surrounding the innermost
+dollar operator.}, i.e., a context that resides outside of the lexically 
+closest dollar.
+
+\Lambdasz

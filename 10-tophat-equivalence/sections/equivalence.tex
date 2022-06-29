@@ -1,0 +1,50 @@
+\startcomponent equivalence
+\product thesis
+\environment thesislayout
+
+
+\section[sec:contextequiv]{Contextual equivalence}
+
+Our goal is to examine when two \TOPHAT-programs are semantically equivalent.
+However, let us first consider what it means in general for two programs $e_1$ and $e_2$ to be semantically equivalent,
+denoted by $e_1 \exprequiv e_2$.
+According to Sewell \cite[Sewell2009], a good definition of semantic equivalence should satisfy the following properties:
+
+\startitemize[n]
+  \item
+    Programs that result in values that are observably different should not be equivalent.
+  \item
+    Programs that terminate should not be equivalent to programs that do not terminate.
+  \item
+    The relation $\exprequiv$ should be an \emph{equivalence relation}:
+    it is reflexive, symmetric and transitive.
+  \item
+    The relation $\exprequiv$ should be a \emph{congruence}.
+    That is if $e_1 \exprequiv e_2$, then for all program contexts $E[\cdot]$,
+    we like to have $E[e_1] \exprequiv E[e_2]$.
+    Here we fill the hole $\cdot$ with any well typed expression,
+  \item
+    The relation $\exprequiv$ should contain as many programs as possible subject to the above properties.
+\stopitemize
+
+It should be obvious that the first three properties are essential.
+Property 4 about congruence states that if two programs $e_1$ and $e_2$ are semantically equivalent,
+then we should be able to use $e_1$ and $e_2$ interchangeably within any program without changing its meaning.
+Finally, Property 5 ensures that $\exprequiv$ is not just the empty relation.
+We will keep these properties in mind when giving our definitions of semantic equivalence.
+Throughout this text,
+we use the symbol $\exprequiv$ for the semantic equivalence of two expressions in the host language,
+and the symbol $\taskequiv$ for the semantic equivalence of two tasks.
+
+% In the following two sections, \see[sec:exprequiv] and \see[sec:taskequiv],
+% we will look at when two expressions in the host-language and two tasks are semantically equivalent.
+Next, in \see[sec:exprequiv], we give a definition for the semantic equivalence of two expressions in our host language,
+the \STLC.
+Then, in \see[sec:conditions], we introduce five conditions tasks can be in.
+Using these conditions, we define the semantic equivalence of two tasks in \see[sec:taskequiv].
+% The next section, Section \see[sec:expreq], will define when we consider two (non-task) expressions equivalent.
+% The following two sections, Section \see[sec:expreq] and Section \see[sec:taskeq], will look at when we consider two expressions, and two tasks to be semantically equivalent.
+Finally, \see[sec:laws] presents a set of laws that we believe hold true for \TOPHAT-programs with our definition.
+
+
+\stopcomponent

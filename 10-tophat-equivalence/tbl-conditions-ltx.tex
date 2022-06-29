@@ -1,0 +1,18 @@
+\begin{tabular}{CCClL}
+  \toprule
+  \Failing   & \Value     & \Inputs    & \alert{Condition} & \alert{Examples}                                                                                                             \\
+  \midrule
+  \checkmark & -          & -          & Failing           & \Fail, \,\, \Fail \Pair \Fail, \,\, \Fail \Choose \Fail, \,\, (\lambda x.x) \Trans \Fail, \,\, \Fail \Step \lambda x.\View x \\
+  -          & \checkmark & -          & Finished steady   & \View 2, \,\, \View 2 \Pair \View 3, \,\, \View \tuple{2, 3}, \,\, (\lambda x.x + 1) \Trans \View 2                          \\
+  -          & \checkmark & \checkmark & Finished unsteady & \Update 2, \,\, \Update 2 \Pair \Update 3, \,\, \Update \tuple{2, 3}                                                         \\
+  -          & -          & \checkmark & Running           & \Enter \Int \Pair \Fail, \,\, \Update 2 \Step \lambda x.\Fail                                                                \\
+  -          & -          & -          & Stuck             & \View 2 \Step \lambda x.\Fail, \,\, \View 2 \Pair \Fail, \,\, \Fail \Pair \View 2                                            \\
+  \bottomrule
+\end{tabular}
+\\
+{\small
+  Checkmarks for $\Failing$, $\Value$ and $\Inputs$ for a task $t$ and a state $\sigma$ indicate that\\
+  $\Failing(t) = \True$,
+  $\Value(t, \sigma) = v$ for $v \neq \bot$, and
+  $\Inputs(t) \neq \nothing$ respectively.
+}

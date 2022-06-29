@@ -1,0 +1,38 @@
+\section{Grammars}
+
+\newtype{Age}
+\newparam{age}
+
+\startformulas
+  &\Enter^1\Age \Step \lambda \age_1. \\
+  &\Enter^2\Age \Step \lambda \age_2. \\
+  &\View^3 \set{\age_1, \age_2} \\
+\stopformulas
+\startformulas
+  &\Enter^1\Age \Pair \Enter^2\Age \Step \lambda\set{\age_1,\age_2}. \\
+  &\View^3 \set{\age_1, \age_2} \\
+\stopformulas
+
+\startformulas
+  & \Fail \\
+  & \Fail \Pair \Fail \\
+  & \Fail \Step \lambda x.\ \View x \\
+\stopformulas
+
+\startformulas
+  \Enter\Int                         &\mapsto \bot       \\
+  \Update 2                          &\mapsto 2          \\
+  \Update 2 \Pair \View 3            &\mapsto \set{2, 3} \\
+  \Update 2 \Step \lambda x. \View x &\mapsto \bot       \\
+\stopformulas
+
+\startformulas
+  \Enter^k\Int                           &\mapsto \Int!k   \\
+  \Update^k 2                            &\mapsto \Int!k   \\
+  \Update^k 2 \Pair \View^l 3            &\mapsto \Int!k   \\
+  \View^k 2 \Step \lambda x. \Update^l x &\mapsto \nothing \\
+\stopformulas
+
+\usemacro{G-Editors}
+
+\usemacro{G-Tasks}

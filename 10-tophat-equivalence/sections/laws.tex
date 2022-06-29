@@ -1,0 +1,302 @@
+\startcomponent laws
+\product thesis
+\environment thesislayout
+
+
+\section[sec:laws]{Laws on tasks}
+
+\definetabulate[laws][|rM|cM|lM|r|]
+
+Now that we have a definition of semantic equivalence for \TOPHAT-programs, we can look at some interesting properties.
+This section gives some transformation properties that hold (or not) for task equivalence.
+
+Whenever we write a task equivalence, we implicitly universally quantify over tasks $t$.
+So $t_1 \taskequiv t_2$, where tasks $t_1$ and $t_2$ contain task $t$, should be read as $\forall t:\Task\;\tau.\ t_1 \taskequiv t_2$.
+Moreover, whenever we write a task inequivalence, then we mean that there exists at least one task $t$ for which the equivalence does not hold.
+So $t_1 \ntaskequiv t_2$, where tasks $t_1$ and $t_2$ contain task $t$, should be read as $\neg\forall t:\Task\;\tau.\ t_1 \taskequiv t_2$, or $\exists t:\Task\;\tau.\ t_1 \ntaskequiv t_2$.
+For some (in)equalities we may use additional tasks, expressions, or functions, in which case these (in)equalities should be interpreted in the same way.
+
+
+% \subsection{Transform}
+%
+% A functor in functional programming and category theory is a mapping.
+% In the functional programming formulation, it consists of:
+% \startitemize[compact]
+%   \item a type constructor $f$;
+%   \item a map operation that, given a function $a \to b$ gives a function $f\, a \to f\, b$.
+% \stopitemize
+% In \TOPHAT, we can map a function over a task by using the transform ($\Trans$) combinator.
+% %
+% An object $f$ is a functor if it satisfies:
+% \startitemize[n]
+%   \item the \emph{identity law}, which says that if we map the identity function over $f\, a$, then the result is again $f\, a$; and
+%   \item the \emph{composition law}, which says that mapping the composition of two functions over $f$ is the same as mapping the two functions over $f$ in a row.
+% \stopitemize
+
+In \TOPHAT, we can express functor laws over the type constructor $\Task$ as follows.
+\startproposition[prp:transforming-laws]{Laws on transform ($\Trans$)}
+  \startformulas[tag]
+    \NC \Id \Trans t
+    \NC \taskequiv
+    \NC t
+    \NC \text{identity}
+  \TR
+    \NC (e_1 \circ e_2) \Trans t
+    \NC \taskequiv
+    \NC e_1 \Trans\ (e_2 \Trans t)
+    \NC \text{composition}
+  \NR
+  \stopformulas
+\stopproposition
+
+\startproofs
+  Given any fixated task $t$ and state $\sigma$, we have that
+  \startitemize
+    \item $\Failing(\Id \Trans t) = \Failing(t)$ by definition (see \doifthesiselse{\see[fig:observation-failing]}{\see[fig:observation-failing-inputs]});
+    \item $\Inputs(\Id \Trans t) = \Inputs(t)$ by definition (see \doifthesiselse{\see[fig:observation-input]}{\see[fig:observation-failing-inputs]}); and
+    \item $\Value(\Id \Trans t, \sigma) = \Value(t, \sigma)$,
+      because if $t$ has no value, then neither does \TS{id <*> t},
+      and if $\Value(t,\sigma) = v$ for $v \neq \bot$, then $\Value(\Id \Trans t, \sigma) = \Id\ v \evaluate v$.
+  \stopitemize
+  A similar argumentation can be made for the composition law.
+  Therefore the $\Task$ operator on types is a functor.
+\stopproofs
+
+
+% \subsection{Pairing}
+%
+% A monoidal functor is a construct in functional programming and category theory lying between a functor and a monad.
+% Informally, it is a functor which preserves the monoidal structure of the category.
+% In functional programming it consists of
+% \startitemize
+%   \item a type constructor $f$;
+%   \item a functorial unit value $f\, \tuple{}$,
+%     which provides a default value whose context wraps nothing of interest;
+%   \item a pairing operation that, given two values $f\, a$ and $f\, b$,
+%     pairs both functorial values in a new value $f\, \tuple{a,b}$.
+% \stopitemize
+% On the type constructor $\Task$, these are the lift ($\Lift$) and pair ($\Pair$) combinators respectively.
+% An alternative formulation is using a pure and apply function, as in Haskell's applicative type class.
+
+For the \TOPHAT\ pairing construct ($\Pair$),
+we can formulate laws which are inspired by the monoidal functor formulation of the laws of Haskell's Applicative type class \cite[journals/jfp/McbrideP08].
+% The laws that a monoidal functor must satisfy can be written in \TOPHAT\ as follows:
+\startproposition[prp:pairing-laws]{Laws on pair ($\Pair$)}
+  \startformulas[tag]
+    \NC \Lift \unit \Pair t
+    \NC \ntaskequiv
+    \NC t
+    \NC \text{left identity}
+  \TR
+    \NC t \Pair \Lift \unit
+    \NC \ntaskequiv
+    \NC t
+    \NC \text{right identity}
+  \TR
+    \NC \Assoc \Trans (t_1 \Pair\ (t_2 \Pair t_3))
+    \NC \taskequiv
+    \NC (t_1 \Pair t_2) \Pair t_3
+    \NC \text{associativity}
+  \TR
+    \NC \tuple{e_1\ \_, e_2\ \_} \Trans\ (t_1 \Pair t_2)
+    \NC \taskequiv
+    \NC (e_1 \Trans t_1) \Pair\ (e_2 \Trans t_2)
+    \NC \text{naturality}
+  \NR
+  \stopformulas
+\stopproposition
+
+\startproofs
+  If we take $t = \Fail$ for the left and right identity laws,
+  then in both cases we have that the right-hand side is a failing task, but the left-hand side is stuck.
+  Pairing requires that both sides fail before it fails itself.
+  Therefore, both the left and right identity laws do not hold.
+  %the $\Task$ constructor on types does not form a monoidal functor.
+
+  However, the other two laws hold using a similar argumentation as in the proof of \see[prp:transforming-laws].
+  For associativity, we need the function $\Assoc := \lambda \tuple{a, \tuple{b,c}}. \tuple{\tuple{a,b},c}$ to make sure that both sides have the same type.
+  Also, the naturality law states that first pairing two tasks and then mapping two functions is the same as first mapping the functions separately and then pairing them.
+\stopproofs
+
+
+% \subsection{Choosing}
+
+For choosing ($\Choose$) we formulate the following properties,
+which are loosely based on the laws of the Alternative type class in Haskell.
+\startproposition[prp:choosing-laws]{Laws on choose ($\Choose$)}
+  \startformulas[tag]
+    \NC t_1 \Choose\ (t_2 \Choose t_3)
+    \NC \taskequiv
+    \NC (t_1 \Choose t_2)\ \Choose t_3
+    \NC \text{associativity}
+  \TR
+    \NC \Lift e \Choose t
+    \NC \taskequiv
+    \NC \Lift e
+    \NC \text{left catch}
+  \TR
+    \NC t \Choose \Lift e
+    \NC \ntaskequiv
+    \NC \Lift e
+    \NC \text{right catch}
+  \TR
+    \NC e \Trans\ (t_1 \Choose t_2)
+    \NC \taskequiv
+    \NC (e \Trans t_1)\ \Choose\ (e \Trans t_2)
+    \NC \text{distributivity}
+  \TR
+    \NC t_0 \Pair\ (t_1 \Choose t_2)
+    \NC \ntaskequiv
+    \NC (t_0 \Choose t_1) \Pair\ (t_0 \Choose t_2)
+    \NC \text{left pair}
+  \TR
+    \NC (t_1 \Choose t_2) \Pair t_0
+    \NC \ntaskequiv
+    \NC (t_1 \Choose t_0) \Pair\ (t_2 \Choose t_0)
+    \NC \text{right pair}
+  \TR
+    \NC t_0 \Step \lambda x. (t_1 \Choose t_2)
+    \NC \taskequiv
+    \NC (t_0 \Step \lambda x. t_1)\ \Choose\ (t_0 \Step \lambda x. t_2)
+    \NC \text{left step}
+  \TR
+    \NC (t_1 \Choose t_2)\ \Step e
+    \NC \taskequiv
+    \NC (t_1 \Step e) \Choose\ (t_2 \Step e)
+    \NC \text{right step}
+  \NR
+  \stopformulas
+\stopproposition
+
+\startproofs
+  Associativity, left catch, and a number of distributivity laws can be proved in a similar way as in \see[prp:transforming-laws].
+  Catch only holds for the left side, because the choice combinator is left-biased.
+  The first distributivity law shows that mapping a function over choice should be equivalent to mapping it separately over its component subtasks.
+  The last two distributivity laws for step ($\Step$) show that stepping to or from a choice is equivalent to choosing between steps.
+
+  Left and right distributivity for pairing ($\Pair$) do not hold.
+  Suppose $\Value(t_0,\sigma) = \bot$, $\Value(t_1,\sigma) = v_1$ and $\Value(t_2,\sigma) = v_2$. % for $v_1 \neq \bot$ and $v_2 \neq \bot$.
+  Then in both cases, we have that the left-hand side of the inequality has no value, because pairing requires that both sides have a value before it has a value itself.
+  However, the right-hand side does have a value in both cases, namely $\tuple{v_1,v_2}$, because the choice combinator normalises $t_0$ away, and we are left with $t_1 \Pair t_2$ in both cases.
+\stopproofs
+
+
+% \subsection{Failing}
+
+When considering the failing task ($\Fail$), we can formulate the following laws:
+\startproposition[prp:_]{Laws on fail ($\Fail$)}
+  \startformulas[tag]
+    \NC \Fail \Choose t
+      \NC \taskequiv
+      \NC t
+      \NC \text{left identity}
+      \TR
+    \NC t \Choose \Fail
+      \NC \taskequiv
+      \NC t
+      \NC \text{right identity}
+      \TR
+    \NC e \Trans \Fail
+      \NC \taskequiv
+      \NC \Fail
+      \NC \text{annihilation}
+      \TR
+    \NC \Fail \Pair t
+      \NC \ntaskequiv
+      \NC \Fail
+      \NC \text{left zero}
+      \TR
+    \NC t \Pair \Fail
+      \NC \ntaskequiv
+      \NC \Fail
+      \NC \text{right zero}
+      \TR
+    \NC \Fail \Step e
+      \NC \taskequiv
+      \NC \Fail
+      \NC \text{left annihilation}
+      \TR
+    \NC t \Step \lambda x. \Fail
+      \NC \ntaskequiv
+      \NC \Fail
+      \NC \text{right annihilation}
+      \NR
+  \stopformulas
+\stopproposition
+
+\startproofs
+  The failure task ($\Fail$) acts as the left and right identity for the choice combinator ($\Choose$).
+  That means that\~$\Fail$ can be cancelled out from the left- and right-hand side of\~$\Choose$.
+  For pairing, left and right zero do not hold, because by definition $\Failing(t_1 \Pair t_2) = \Failing(t_1) \wedge \Failing(t_2)$ (see \doifthesiselse{\see[fig:observation-failing]}{\see[fig:observation-failing-inputs]}).
+  That is, pairing requires that both the left-hand and right-hand side fail before their pairing fails.
+  Thus if only one side fails, it cannot be equivalent to the failing task\~$\Fail$.
+
+  We defined all failing tasks to be semantically equivalent, thus annihilation for $\Trans$, and left step annihilation for $\Step$ trivially hold.
+  Right step annihilation does not however.
+  Suppose that $t$ is not a failing task, then we also have that $t \Step \lambda x.\Fail$ is not a failing task, because $\Failing(t \Step \lambda x.\Fail) = \Failing(t)$ by definition (see \doifthesiselse{\see[fig:observation-failing]}{\see[fig:observation-failing-inputs]}).
+  Neither can we normalise $t \Step \lambda x.\ \Fail$, because the right-hand side fails \doifthesis{(\seerule{N-StepFail})}.
+  So if $t$ does not fail, then neither does $t \Step \lambda x.\Fail$, and we cannot conclude that a non-failing task is semantically equivalent to the failing task $\Fail$.
+\stopproofs
+
+
+% \subsection{Step}
+%
+% A monad in functional programming consists of:
+% \startitemize
+%   \item a type constructor $m$;
+%   \item a return function that wraps any value $a$ into the monadic value $m\ a$; and
+%   \item a bind function that extracts the value $a$ from $m\ a$, and uses it to produce a new monadic value $m\ b$.
+% \stopitemize
+% Furthermore, for type constructor $m$ to be considered a monad, it must satisfy three laws:
+% \startitemize[n]
+%   \item return is a \emph{left identity} for bind;
+%   \item return is a \emph{right identity} for bind; and
+%   \item bind is \emph{associative}.
+% \stopitemize
+
+Steps ($\Step$) in \TOPHAT\ have a monadic flavour to them, and we can wonder whether the step combinator is a bind operation.
+So, if we consider $\Task$ to be the monadic type constructor, $\Lift$ the return function, and $\Step$ the bind function, then we can express the three monadic laws in \TOPHAT\ as follows.
+\startproposition[prp:_]{Laws on step ($\Step$)}
+  \startformulas[tag]
+    \NC \Lift x \Step g
+      \NC \ntaskequiv
+      \NC g\ x
+      \NC \text{left identity}
+      \TR
+    \NC t \Step\ (\lambda y. \Lift y)
+      \NC \ntaskequiv
+      \NC t
+      \NC \text{right identity}
+      \TR
+    \NC (t \Step g) \Step h
+      \NC \taskequiv
+      \NC t \Step\ (\lambda y. g\ y \Step h)
+      \NC \text{associativity}
+      \NR
+  \stopformulas
+\stopproposition
+
+\startproofs
+  With our definition of program equivalence, we can show that neither the left nor the right identity laws hold.
+  For the left identity, take for example $g := \lambda x.\Fail$, then we have that $g\ x$ is a failing task, because $g\ x = (\lambda x.\Fail)\ x \evaluate \Fail$.
+  However, the left-hand side $\Lift x \Step g = \Lift x \Step \lambda x.\Fail$ is a stuck task, because it does not fail, and the step can never be taken.
+
+  For the right identity law we can take for example $t := \Enter^k \Int$.
+  If we send the input event $k!42$ to both sides, then the left-hand side normalises to $\Lift 42$, while the right-hand side becomes $\Update^k 42$.
+  As we have already seen, these two tasks are not semantically equivalent, because the value of $\Lift 42$ is steady and cannot be changed any more,
+  while the value of $\Update^k 42$ is unsteady and can be updated through user input.
+
+  However, the associativity law holds.
+  Given any fixated task $t$ and state $\sigma$, for $\Failing$ and $\Inputs$ we have that:
+  \startformulas[four]
+    \NC \Failing\big((t \Step g) \Step h\big) \NC = \Failing(t \Step g) \NC = \Failing(t) \NC = \Failing\big(t \Step (\lambda y.g\ y \Step h)\big) \TR
+    \NC \Inputs\big((t \Step g) \Step h\big)  \NC = \Inputs(t \Step g)  \NC = \Inputs(t)  \NC = \Inputs\big(t \Step (\lambda y.g\ y \Step h)\big)  \NR
+  \stopformulas
+  \noindentation
+  by definition (see \doifthesiselse{\see[fig:observation-failing] and \see[fig:observation-input]}{\see[fig:observation-failing-inputs]}).
+  Furthermore, supposing that $\Value(t,\sigma) = v$, % for $v \neq \bot$,
+  and $g\ v \evaluate t'$ with $\neg\Failing(t')$, then both sides normalise to $t' \Step h$ in some state $\sigma'$.
+  On the other hand, if either $\Value(t,\sigma) = \bot$ or $\Failing(t')$, then the step cannot be taken, and we have that $\Value\big((t \Step g) \Step h\big) = \Value\big(t \Step (\lambda y.g\ y \Step h)\big) = \bot$.
+\stopproofs
+
+\stopcomponent

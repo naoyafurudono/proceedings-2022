@@ -1,0 +1,17 @@
+\starttabulate[|cM|cM|cM|l|lM|]
+  \FL
+  \NC \Failing   \NC \Value     \NC \Inputs    \NC \alert{Condition} \NC \alert{Examples}                                                                                                           \NR
+  \ML
+  \NC \checkmark \NC -          \NC -          \NC Failing           \NC \Fail, \,\, \Fail \Pair \Fail, \,\, \Fail \Choose \Fail, \,\, (\lambda x.x) \Trans \Fail, \,\, \Fail \Step \lambda x.\Lift x \NR
+  \NC -          \NC \checkmark \NC -          \NC Steady            \NC \Lift 2, \,\, \Lift 2 \Pair \Lift 3, \,\, \Lift \tuple{2, 3}, \,\, (\lambda x.x + 1) \Trans \Lift 2                          \NR
+  \NC -          \NC \checkmark \NC \checkmark \NC Unsteady          \NC \Update 2, \,\, \Update 2 \Pair \Update 3, \,\, \Update \tuple{2, 3}                                                       \NR
+  \NC -          \NC -          \NC \checkmark \NC Running           \NC \Enter \Int \Pair \Fail, \,\, \Update 2 \Step \lambda x.\Fail                                                              \NR
+  \NC -          \NC -          \NC -          \NC Stuck             \NC \Lift 2 \Step \lambda x.\Fail, \,\, \Lift 2 \Pair \Fail, \,\, \Fail \Pair \Lift 2                                          \NR
+  % \NC - \NC - \NC \checkmark \NC Running (branching) \NC \Enter \Int \Step \lambda x.\Ite{x \leq 2}{\Lift x}{\Fail} \NR
+  \LL
+\stoptabulate
+\noindentation
+(Checkmarks (\checkmark) for $\Failing$, $\Value$ and $\Inputs$ for a task $t$ and a state $\sigma$ indicate that
+  $\Failing(t) = \True$,
+  $\Value(t, \sigma) = v$ for $v \neq \bot$, and
+  $\Inputs(t) \neq \nothing$ respectively.)

@@ -1,0 +1,24 @@
+\startcomponent recap
+\product thesis
+\environment thesislayout
+
+
+\doifthesiselse
+  {\section{Recap}}
+  {\section[sec:conclusions]{Conclusions}}
+
+In this \doifthesiselse{chapter}{paper}, we took \TOPHAT\ as a foundation to reasoning about task-oriented programs.
+We gave a definition for the semantic equivalence of two \TOPHAT-programs.
+We split this definition into two classes: expression equivalence, and task equivalence.
+For task equivalence, we showed that a task can be in either one of five conditions after fixation,
+and for every two tasks in the same condition, we defined what it means for them to be semantically equivalent.
+We also noted that for task conditions that still accept user input,
+it is important to take the interactive setting of \TOPHAT\ into account,
+and compare how both tasks react to user input.
+We presented a set of transformation laws for \TOPHAT-programs.
+Especially, we showed that the $\Task$ type constructor in \TOPHAT\ is not a monad but it is a functor.
+Using these laws, developers and compilers can do safe transformations on task-oriented programs,
+while being sure the semantic meaning of the program stays the same.
+
+
+\stopcomponent

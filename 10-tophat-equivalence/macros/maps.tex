@@ -1,0 +1,209 @@
+
+%% Observations %%
+
+\newmacro{O-Value}{
+  \begin{function}
+    \signature{\Value : \mathrm{Normalised\ task} \times \mathrm{State} \rightharpoonup \mathrm{Value}} \\
+  \addlinespace
+    \Value(\Enter^k \beta, \sigma)                     &=& \bot \\
+    \Value(\Update^k b, \sigma)                        &=& b \\
+    \Value(\View^k b, \sigma)                          &=& b \\
+    \Value(\Change^k h, \sigma)                        &=& \sigma(h) \\
+    \Value(\Watch^k h, \sigma)                         &=& \sigma(h) \\
+  \addlinespace
+    \Value(\Lift v, \sigma)                            &=& v \\
+    \Value(\Fail, \sigma)                              &=& \bot \\
+  \addlinespace
+    \Value(t_1 \Step e_2, \sigma)                      &=& \bot \\
+    \Value(e_1 \Trans t_2, \sigma)                     &=& \left\{
+      \begin{array}{ll}
+        v_2'                                           & \ \when\ \Value(t_2,\sigma) = v_2 \land e_1\ v_2 \evaluate v_2' \\
+        \obox{\tuple{v_1, v_2}}{\bot}                  & \ \otherwise \\
+      \end{array}
+    \right. \\
+  \addlinespace
+    \Value(t_1 \Pair t_2, \sigma)                      &=& \left\{
+      \begin{array}{ll}
+        \tuple{v_1, v_2}                               & \ \when\ \Value(t_1, \sigma) = v_1 \land \Value(t_2, \sigma) = v_2 \\
+        \bot                                           & \ \otherwise \\
+      \end{array}
+    \right. \\
+    \Value(t_1 \Choose t_2, \sigma)                    &=& \left\{
+      \begin{array}{ll}
+        v_1                                            & \ \when\ \Value(t_1, \sigma) = v_1 \\
+        v_2                                            & \ \when\ \Value(t_1, \sigma) = \bot \land \Value(t_2, \sigma) = v_2 \\
+        \obox{\tuple{v_1, v_2}}{\bot}                  & \ \otherwise \\
+      \end{array}
+    \right. \\
+  \end{function}
+}
+
+\newmacro{O-Value-A}{
+  \begin{function}
+    \signature{\Value : \mathrm{Normalised\ task} \times \mathrm{State} \rightharpoonup \mathrm{Value}} \\
+  \addlinespace
+    \Value(\Enter^k \beta, \sigma)                     &=& \bot \\
+    \Value(\Update^k b, \sigma)                        &=& b \\
+    \Value(\View^k b, \sigma)                          &=& b \\
+    \Value(\Change^k h, \sigma)                        &=& \sigma(h) \\
+    \Value(\Watch^k h, \sigma)                         &=& \sigma(h) \\
+  \addlinespace
+    \Value(\Lift v, \sigma)                            &=& v \\
+    \Value(\Fail, \sigma)                              &=& \bot \\
+  \end{function}
+}
+\newmacro{O-Value-B}{
+  \begin{function}
+    \\
+  \addlinespace
+    \Value(t_1 \Step e_2, \sigma)                      &=& \bot \\
+    \Value(e_1 \Trans t_2, \sigma)                     &=& \left\{
+      \begin{array}{ll}
+        v_2'                                           & \ \when\ \Value(t_2,\sigma) = v_2 \land e_1\ v_2 \evaluate v_2' \\
+        \obox{\tuple{v_1, v_2}}{\bot}                  & \ \otherwise \\
+      \end{array}
+    \right. \\
+  \addlinespace
+    \Value(t_1 \Pair t_2, \sigma)                      &=& \left\{
+      \begin{array}{ll}
+        \tuple{v_1, v_2}                               & \ \when\ \Value(t_1, \sigma) = v_1 \land \Value(t_2, \sigma) = v_2 \\
+        \bot                                           & \ \otherwise \\
+      \end{array}
+    \right. \\
+    \Value(t_1 \Choose t_2, \sigma)                    &=& \left\{
+      \begin{array}{ll}
+        v_1                                            & \ \when\ \Value(t_1, \sigma) = v_1 \\
+        v_2                                            & \ \when\ \Value(t_1, \sigma) = \bot \land \Value(t_2, \sigma) = v_2 \\
+        \obox{\tuple{v_1, v_2}}{\bot}                  & \ \otherwise \\
+      \end{array}
+    \right. \\
+  \end{function}
+}
+
+\newmacro{O-Failing}{
+  \begin{function}
+    \signature{\Failing : \mathrm{Task} \to \mathrm{Boolean}} \\
+  \addlinespace
+    \Failing(\Fail)                              &=& \True \\
+  \addlinespace
+    \Failing(e_1 \Trans t_2)                     &=& \Failing(t_2) \\
+    \Failing(t_1 \Step e_2)                      &=& \Failing(t_1) \\
+    \Failing(t_1 \Pair t_2)                      &=& \Failing(t_1) \land \Failing(t_2) \\
+    \Failing(t_1 \Choose t_2)                    &=& \Failing(t_1) \land \Failing(t_2) \\
+  \addlinespace
+    \Failing(\_)                                 &=& \False \\
+  \end{function}
+}
+
+\newmacro{O-Inputs}{
+  \begin{function}
+    \signature{\Inputs : \mathrm{Normalised\ task} \to \powerset{\mathrm{Input}}} \\
+  \addlinespace
+    \Inputs(\Enter^k \beta)                      &=& \set{k!b' \mid b':\beta} \\
+    \Inputs(\Update^k b)                         &=& \set{k!b' \mid b':\beta} \quad\where\ \Update b : \Task\beta \\
+    % \Inputs(\View b)                           &=& \nothing
+    \Inputs(\Change^k h)                         &=& \set{k!b' \mid b':\beta} \quad\where\ \Change l : \Task\beta \\
+    % \Inputs(\Watch h)                          &=& \nothing
+  \addlinespace
+    \Inputs(e_1 \Trans t_2)                    &=& \Inputs(t_2) \\
+    \Inputs(t_1 \Step e_2)                     &=& \Inputs(t_1) \\
+    \Inputs(t_1 \Pair t_2)                     &=& \Inputs(t_1) \cup \Inputs(t_2) \\
+    \Inputs(t_1 \Choose t_2)                   &=& \Inputs(t_1) \cup \Inputs(t_2) \\
+  \addlinespace
+    \Inputs(\_)                                &=& \nothing \\
+  \end{function}
+}
+
+
+%% Grammars %%
+
+\newmacro{G-Expression-contexts}{
+  \begin{grammar*}
+    E::=&                      & Contexts         \\
+  \addlinespace
+    \mid& \cdot                & – hole             \\
+    \mid& \lambda m:\tau.\ E   & – abstraction      \\
+    \mid& E_1\ E_2             & – application      \\
+    \mid& x                    & – variable         \\
+    \mid& h                    & – heap location    \\
+  \addlinespace
+    \mid& \Ite{E_1}{E_2}{E_3}  & – conditional      \\
+    \mid& \unit                & – unit             \\
+    \mid& \record{E_1, E_2}    & – tuple            \\
+  \addlinespace
+    \mid& c                    & – constant         \\
+    \mid& P                    & – pre-task context \\
+  \end{grammar*}
+}
+
+\newmacro{G-Editors}{
+  \begin{grammar*}
+    d::=&                     & Editors \\
+  \addlinespace
+    \mid& \Enter^{\nu}\beta   & – unvalued         editor \\
+    \mid& \Update^{\nu} b     & – valued           editor \\
+    \mid& \View^{\nu} b       & – valued read-only editor \\
+  \addlinespace
+    \mid& \Change^{\nu} h     & – shared           editor \\
+    \mid& \Watch^{\nu} h      & – shared read-only editor \\
+  \end{grammar*}
+}
+
+\newmacro{G-Tasks}{
+  \begin{grammar*}
+    t::=&                     & Tasks            \\
+  \addlinespace
+    \mid& d                   & – editor           \\
+  \addlinespace
+    \mid& t_1 \Step e_2       & – step             \\
+  \addlinespace
+    \mid& t_1 \Pair t_2       & – pair             \\
+    \mid& t_1 \Choose t_2     & – choose           \\
+  \addlinespace
+    \mid& \Fail               & – fail             \\
+  \addlinespace
+    \mid& \ldots              &                  \\
+  \addlinespace
+    \mid& \Lift v             & – internal         editor \\
+    \mid& e_1 \Trans t_2      & – transform        \\
+    \mid& \Share v            & – share            \\
+    \mid& h_1 \Assign v_2     & – assign           \\
+  \end{grammar*}
+}
+
+\newmacro{G-Task-contexts}{
+  \begin{grammar*}
+    P::=&                     & Pre-task contexts\\
+  \addlinespace
+    \mid& \Enter^{\nu}\beta   & – unvalued         editor \\
+    \mid& \Update^{\nu} E     & – valued           editor \\
+    \mid& \Change^{\nu} E     & – shared           editor \\
+    \mid& \View^{\nu} E       & – valued read-only editor \\
+    \mid& \Watch^{\nu} E      & – shared read-only editor \\
+  \addlinespace
+    \mid& E_1 \Trans E_2      & – transform        \\
+    \mid& E_1 \Pair E_2       & – pair             \\
+    \mid& \Lift E             & – lift             \\
+    \mid& E_1 \Choose E_2     & – choose           \\
+    \mid& \Fail               & – fail             \\
+    \mid& E_1 \Step E_2       & – step             \\
+  \addlinespace
+    \mid& \Share E            & – share            \\
+    \mid& E_1 \Assign E_2     & – assign           \\
+  \end{grammar*}
+}
+
+\newmacro{G-Static-Tasks}{
+  \begin{grammar*}
+      s::=&                 & Static tasks     \\
+    \addlinespace
+      \mid& \Update^k b     & – valued           editor \\
+      \mid& \Change^k h     & – shared           editor \\
+      \mid& \View^k b       & – valued read-only editor \\
+      \mid& \Watch^k h      & – shared read-only editor \\
+    \addlinespace
+      \mid& v_1 \Trans s_2  & – transform        \\
+      \mid& s_1 \Pair s_2   & – pair             \\
+      \mid& \Lift v         & – lift             \\
+  \end{grammar*}
+}
