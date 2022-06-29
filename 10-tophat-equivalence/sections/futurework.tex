@@ -1,0 +1,12 @@
+
+\subsubject{Future work}
+
+In future work, we would like to implement the transformation laws presented in \see[sec:laws] in \TOPHAT's symbolic execution engine \cite[conf/ifl/NausSK19].
+This could speed up symbolic evaluation and give faster results on next step hints for end users.
+Also, we would like to investigate the implications of our findings on the \ITASKS\ system,
+which could benefit from implementing the transformation laws in the same way.
+
+Regrettably, our previous choice in \cite[conf/ppdp/SteenvoordenNK19] to make pairing tasks ($t_1 \Pair t_2$) fail when both $t_1$ \emph{and} $t_2$ fail,
+implies that the $\Task$ type constructor does not form an applicative functor.
+This would be the case when we'd define $\Failing(t_1 \Pair t_2) = \Failing(t_1) \lor \Failing(t_2)$.
+More research is needed to gain information on the impact of this change on the rest of the formalisation.

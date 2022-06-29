@@ -1,0 +1,172 @@
+\startcomponent interplay
+\product thesis
+\environment thesislayout
+
+
+\section{Appendix}
+
+In this section we prove some properties of our observations functions introduced in \see[sec:observations]
+and show that they play well together.
+
+
+\subsection{Failing}
+
+First, we prove that our failing observation $\Failing$ indeed observes a task that
+does \emph{not} have a value, and does \emph{not} have possible inputs.
+That is, the value observation $\Value$ is undefined,
+and the inputs observation $\Inputs$ gives the empty set.
+
+\startproposition[prp:failing-no-interaction]{Failing tasks cannot have interaction}
+  For all well typed normalised tasks $n$ and state $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $\Failing(n) = \True$,
+  \NL then $\Value(n,\sigma) = \bot$ and $\Inputs(n) = \emptyset$.
+\stopproposition
+
+\startproof
+  This proposition is mechanically proved by induction over $n$ in Idris,
+  see\-\impl{Task.Proofs.Failing.failingMeansNoInteraction}.
+\stopproof
+
+Note that the converse statement is not true:
+a task which does not have a value and does not have possible inputs is not necessarily failing.
+The task \TS{view 42 <&> fail}
+does not have a value, because the right hand side of the pair combinator does not have a value; and
+does not have possible inputs, because the left hand side is a read-only editor.
+However, $\Failing(\View 42 \Pair \Fail) = \False$,
+because the failing observation needs both sides of the pair to be failing, but the left hand side clearly is not.
+This deviates from the properties from earlier \TOPHAT\ versions \cite[conf/ppdp/SteenvoordenNK19,conf/ifl/NausSK19].
+
+
+\subsection{Inputs}
+
+Next, we validate our inputs observation $\Inputs$.
+It calculates all possible inputs for a given task.
+We need to show that the set of possible inputs it produces is both sound and complete with respect to the handling ($\handle{}$) and interaction ($\interact{}$) semantics.
+By sound we mean that all inputs in the set of possible inputs can actually be handled by the semantics,
+and by complete we mean that the set of possible inputs contains all inputs that can be handled by the semantics.
+\see[prp:correctness-i] expresses exactly this property for the handling semantics.
+
+\startproposition[prp:correctness-i]{Inputs is sound and complete (wrt handle)}
+  % For all well typed expressions $e$, states $\sigma$, and inputs $i$,
+  For all well typed normalised tasks $n$, states $\sigma$, and inputs $\iota$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL $i \in \Inputs(n)$ if and only if
+  \NL there exists task $t'$, state $\sigma'$, and dirty set $\delta'$
+  \NL such that $n,\sigma \handle{\iota} t',\sigma',\delta'$.
+\stopproposition
+
+\startproof
+  This theorem is mechanically proved by induction on $n$ in Idris,
+  see\-\impl{Task.Proofs.Inputs.inputIsHandled} and \impl{Task.Proofs.Inputs.handleIsPossible}.
+\stopproof
+
+Because of the structure of the interaction semantics ($\interact{}$),
+\see[prp:correctness-i] directly gives us soundness and completeness of inputs with respect to interact.
+
+\startcorollary[cor:correctness-i]{Inputs is sound and complete (wrt normalise)}
+  For all well typed normalised tasks $n$, states $\sigma$, and inputs $\iota$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL $i \in \Inputs(n)$ if and only if
+  \NL there exists normalised task $n'$, and state $\sigma'$
+  \NL such that $n,\sigma \interact{\iota} n',\sigma'$.
+\stopcorollary
+
+By combining \see[prp:failing-no-interaction] and \see[cor:correctness-i],
+we know that failing tasks cannot handle input.
+
+\startcorollary[cor:failing-tasks-no-handling]{Failing tasks cannot handle input}
+  For all well typed normalised tasks $n$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $\Failing(n)$,
+  \NL there is no input $\iota$ such that $n,\sigma \handle{\iota} t',\sigma',\delta'$.
+\stopcorollary
+
+
+\subsection{Value}
+
+Last, we prove that, when we can observe a value from a task, this task is a \emph{static task}.
+By static tasks, we mean that the shape of the tree of task nodes and leaves are static and cannot be dynamically altered at runtime.
+\doifthesis{We will use this property when discussing equivalence of task in \see[chp:equivalence].}
+% \See[fig:static-tasks-grammar] shows its grammar.
+
+\placefigure[][fig:static-tasks-grammar]
+  {Static tasks}
+  {\startgrammar
+    \useproduction{G-Static-Tasks}
+  \stopgrammar}
+
+\startdefinition[def:static-task]{Static task}
+  We call tasks \emph{static} when they consist of
+  a valued editor,
+  pairs of static tasks,
+  or transforms of static tasks.
+  That is, they confirm to the grammar presented in \see[fig:static-tasks-grammar].
+
+  Note that static tasks are a subset of normalised tasks.
+\stopdefinition
+
+\startproposition[prp:valued-means-static]{Valued tasks are static}
+  For all well typed normalised tasks $n$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $\Value(n,\sigma) = v$,
+  \NL then $n$ is static.
+  % Moreover, we have that
+  % \NL the shape of $n$ cannot be altered at runtime.
+\stopproposition
+
+\startproof
+  We have that $\Value(n,\sigma) = v : \beta$.
+  When taking the definition of $\Value$ into account (as given in \see[fig:observation-value]),
+  we see that $n$ can only be in one of four shapes:
+  \startitemize
+    \item a valued editor $d$ (that is $d \neq \Enter\beta$);
+    \item a pair $n_1 \Pair n_2$, for which $\Value(n_1,\sigma) = v_1$ and $\Value(n_2,\sigma) = v_2$;
+    \item a transform $e_1 \Trans n_2$, for which $\Value(n_2,\sigma) = v_2$;
+    \item a lift $\Lift v$.
+  \stopitemize
+  Especially, step ($n_1 \Step e_2$) and fail ($\Fail$) are ruled out, because they have no value.
+  Choice ($n_1 \Choose n_2$) is ruled out, because by rules \seerule{N-Choose[Left,Right,None]},
+  the only way that this combinator can survive normalisation is for both $n_1$ and $n_2$ to not have a value,
+  which should be the case here.
+  Now, by induction, we have that $n$ is static and meets the grammar in \see[fig:static-tasks-grammar].
+
+  See also \impl{Task.Proofs.Static.valued\_means\_static} in Idris.
+\stopproof
+
+As static tasks do not contain steps ($n_1 \Step e_2$) or choices ($n_1 \Choose n_2$),
+their form cannot be altered at runtime.
+That is, there is no way for end users to create new (sub)tasks.
+
+\startcorollary[cor:static-stays-static]{Static tasks stay static}
+  For all well typed normalised tasks $n$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $n$ is static,
+  \NL its shape cannot be altered at runtime.
+\stopcorollary
+
+% \startproof
+%   By induction on the handling and normalisation rules.
+%   \todo{Idris}
+% \stopproof
+
+% Now, because we cannot create new (sub)tasks at runtime,
+In particular, we cannot create or delete editors at runtime.
+So the input events a static task can process will always be the same.
+
+\startcorollary[cor:static-keeps-input]{Static tasks keep input observation}
+  For all well typed normalised tasks $n$ and states $\sigma$,
+  % that is $\Gamma,\Sigma \infers n:\Task\tau$ and $\Gamma,\Sigma \infers \sigma$,
+  we have that
+  \NL if $n$ is static,
+  \NL and $n,\sigma \interact{\iota} n',\sigma'$ for some $\iota \in \Inputs(n)$
+  \NL then $\Inputs(t) = \Inputs(t')$.
+\stopcorollary
+
+\stopcomponent

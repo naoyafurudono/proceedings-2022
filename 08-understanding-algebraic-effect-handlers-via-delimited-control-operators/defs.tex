@@ -1,0 +1,159 @@
+% Languages
+\newcommand{\lambdasz}{$\lambda_{S_0}$\xspace}
+\newcommand{\lambdah}{$\lambda_h$\xspace}
+\newcommand{\lambdahn}{$\lambda_h^-$\xspace}
+\newcommand{\lambdac}{$\lambda_c$\xspace}
+
+% Environments
+\newcommand{\mtenv}{\bullet}
+\newcommand{\extenv}[3]{#1, #2 : #3}
+\newcommand{\extenvtwo}[5]{#1, #2 : #3, #4 : #5}
+\newcommand{\extenvthree}[7]{#1, #2 : #3, #4 : #5, #6 : #7}
+
+% DS Types
+\newcommand{\basety}{b}
+\newcommand{\intty}{\texttt{int}\xspace}
+\newcommand{\boolty}{\texttt{bool}\xspace}
+\newcommand{\strty}{\texttt{string}\xspace}
+\newcommand{\earrowty}[3]{#1 \rightarrow \cty{#2}{#3}}
+\newcommand{\carrowty}[2]{#1 \rightarrow #2}
+\newcommand{\oparrowty}[2]{#1 \Rightarrow #2}
+\newcommand{\forallty}[2]{\forall #1.\, #2}
+\newcommand{\mteff}{[]}
+\newcommand{\pureeff}{\iota}
+\newcommand{\atmeff}[5]{\langle \oparrowty{#1}{#2}, #3, #4, #5 \rangle}
+\newcommand{\conseff}[2]{#1 :: #2}
+\newcommand{\effl}[4]{(\oparrowty{#1}{#2}, #3) :: #4}
+\newcommand{\effc}[3]{(\oparrowty{#1}{#2}, #3)}
+\newcommand{\effp}[2]{\oparrowty{#1}{#2}}
+\newcommand{\effr}[3]{\langle #1, \oparrowty{#2}{#3} \rangle}
+\newcommand{\cty}[2]{#1 \, ! \, #2}
+\newcommand{\catmty}[6]{\cty{#1}{\atmeff{#2}{#3}{#4}{#5}{#6}}}
+
+\newcommand{\tauonepr}{\tau_1^\prime}
+\newcommand{\tauoneprpr}{\tau_1^{\prime\prime}}
+\newcommand{\tautwopr}{\tau_2^\prime}
+\newcommand{\tautwoprpr}{\tau_2^{\prime\prime}}
+\newcommand{\alphapr}{\alpha^\prime}
+\newcommand{\epsilonpr}{\epsilon^\prime}
+
+\newcommand{\Apr}{A^\prime}
+\newcommand{\Bpr}{B^\prime}
+\newcommand{\Cpr}{C^\prime}
+\newcommand{\Dpr}{D^\prime}
+\newcommand{\Epr}{E^\prime}
+
+% CPS Types
+\newcommand{\parrowty}[2]{#1 \rightarrow #2}
+\newcommand{\parrowtytwo}[3]{#1 \rightarrow #2 \rightarrow #3}
+\newcommand{\ansty}[3]{\parrowty{(\parrowtytwo{#1}{(\parrowty{#2}{#3})}{#3})}{#3}}
+\newcommand{\manstyone}[4]{\parrowty{(\parrowtytwo{#1}{(\parrowty{#2}{#3})}{#4})}{#3}}
+\newcommand{\manstytwo}[4]{\parrowty{(\parrowtytwo{#1}{(\parrowty{#2}{#3})}{#4})}{#4}}
+\newcommand{\compty}[2]{\parrowty{(\parrowty{#1}{#2})}{#2}}
+\newcommand{\ecompty}[4]{\compty{#1}{(\ansty{#2}{#3}{#4})}}
+\newcommand{\mcompty}[5]{\parrowty{(\parrowty{#1}{(\manstyone{#2}{#3}{#4}{#5})})}{(\manstytwo{#2}{#3}{#4}{#5})}}
+\newcommand{\pcompty}[4]{\forallty{#1}{\compty{#2}{(\ansty{#3}{#4}{#1})}}}
+
+% DS Terms
+\newcommand{\abs}[2]{\lambda #1.\, #2}
+\newcommand{\pair}[2]{\langle #1, #2 \rangle}
+\newcommand{\app}[2]{#1 \ #2}
+\newcommand{\lettt}{\texttt{let}\xspace}
+\newcommand{\intt}{\texttt{in}}
+\newcommand{\letin}[3]{\lettt \ #1 = #2 \ \intt \ #3}
+\newcommand{\letnoin}[2]{\lettt \ #1 = #2}
+\newcommand{\fst}[1]{\texttt{fst} \ #1}
+\newcommand{\snd}[1]{\texttt{snd} \ #1}
+
+\newcommand{\Vpr}{V^\prime}
+
+% Effect Constructs
+\newcommand{\shifttt}{\texttt{shift}\xspace}
+\newcommand{\resettt}{\texttt{reset}\xspace}
+\newcommand{\shiftztt}{\texttt{shift0}\xspace}
+\newcommand{\resetztt}{\texttt{reset0}\xspace}
+\newcommand{\controlztt}{\texttt{control0}\xspace}
+\newcommand{\promptztt}{\texttt{prompt0}\xspace}
+\newcommand{\shiftzsym}{\mathcal{S}_0\xspace}
+\newcommand{\shiftz}[2]{\shiftzsym #1.\, #2}
+\newcommand{\resetz}[1]{\langle #1 \rangle}
+\newcommand{\dollar}[2]{#1 \, \$ \, #2}
+\newcommand{\dollarret}[3]{\langle #1 \mid #2.#3 \rangle}
+\newcommand{\doop}[1]{\texttt{do} \ #1}
+\newcommand{\doopl}[2]{\texttt{do} \ \pair{#1}{#2}}
+\newcommand{\handlett}{\texttt{handle}}
+\newcommand{\withtt}{\texttt{with}}
+\newcommand{\handlewith}[1]{\handlett \ #1 \ \withtt}
+\newcommand{\handler}[5]{\{ #1. \, #2; \, #3, #4. \, #5 \}}
+\newcommand{\handle}[6]{\handlett \ #1 \ \withtt \ \handler{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\handleone}[4]{\handlett \ #1 \ \withtt \ \{ #2, #3. \, #4 \}}
+\newcommand{\handletwo}[6]{\handlett \ #1 \ \withtt \ \{ \rettt, #2, \_. \, #3; \, \optt, #4, #5. \, #6 \}}
+\newcommand{\rettt}{\texttt{ret}\xspace}
+\newcommand{\returntt}{\texttt{return}\xspace}
+\newcommand{\ret}[1]{\returntt \ #1}
+\newcommand{\optt}{\texttt{op}\xspace}
+\newcommand{\casett}{\texttt{case}}
+\newcommand{\caseptt}{\casett_p}
+\newcommand{\oftt}{\texttt{of}}
+\newcommand{\caseof}[5]{\casett \ #1 \ \oftt \ \{ #2 \rightarrow #3; #4 \rightarrow #5 \}}
+\newcommand{\casep}[4]{\casett_p \ #1 \ \oftt \ \{ \pair{#2}{#3} \rightarrow #4 \}}
+\newcommand{\casel}[3]{\casett_l \ #1 \ \oftt \ \{ \rettt \rightarrow #2; \optt \rightarrow #3 \}}
+
+\newcommand{\vpr}{v^\prime}
+\newcommand{\lpr}{l^\prime}
+
+% CPS Terms
+\newcommand{\Abs}[2]{\Lambda #1.\, #2}
+\newcommand{\abstwo}[3]{\abs{#1}{\abs{#2}{#3}}}
+\newcommand{\apptwo}[3]{\app{\app{#1}{#2}}{#3}}
+\newcommand{\appthree}[4]{\app{\app{\app{#1}{#2}}{#3}}{#4}}
+\newcommand{\idcont}{id}
+\newcommand{\kpr}{k^\prime}
+\newcommand{\hpr}{h^\prime}
+
+\newcommand{\croot}{M}
+\newcommand{\val}{V}
+\newcommand{\ans}{A}
+\newcommand{\cont}{K}
+\newcommand{\hand}{H}
+
+% Reduction
+\newcommand{\cxt}{E}
+\newcommand{\hole}{[]}
+\newcommand{\subst}[3]{#1 [#3 / #2]}
+\newcommand{\substtwo}[5]{#1 [#3 / #2, #5 / #4]}
+\newcommand{\substthree}[7]{#1 [#3 / #2, #5 / #4, #7 / #6]}
+\newcommand{\reduce}{\leadsto}
+\newcommand{\reduces}{\leadsto^\ast}
+
+% Judgements
+\newcommand{\judgev}[3]{#1 \vdash #2 : #3}
+\newcommand{\judgec}[3]{#1 \vdash #2 : #3}
+\newcommand{\judgee}[4]{#1 \vdash #2 : \cty{#3}{#4}}
+\newcommand{\judgep}[3]{#1 \vdash #2 : #3}
+\newcommand{\judgeatm}[8]{#1 \vdash #2 : \cty{#3}{\atmeff{#4}{#5}{#6}{#7}{#8}}}
+\newcommand{\judgety}[1]{\vdash #1}
+\newcommand{\rulename}[1]{(\textsc{#1})}
+\newcommand{\typing}[3]{\trfrac{#1}{#2} \ \rulename{#3}}
+
+% Translation
+\newcommand{\macro}[1]{\llbracket #1 \rrbracket_m}
+
+\newcommand{\cps}[1]{\llbracket #1 \rrbracket_c}
+\newcommand{\cpsv}[1]{\llbracket #1 \rrbracket_{c^\prime}}
+\newcommand{\cpsF}[1]{\llbracket #1 \rrbracket_F}
+\newcommand{\cpsty}[1]{{#1}^{\ast}}
+\newcommand{\cpsans}[2]{(#1, #2)^{\ast}}
+
+\newcommand{\ds}[1]{\llbracket #1 \rrbracket_d}
+\newcommand{\dsr}[1]{\llbracket #1 \rrbracket_r}
+\newcommand{\dsv}[1]{\llbracket #1 \rrbracket_v}
+\newcommand{\dsa}[1]{\llbracket #1 \rrbracket_a}
+\newcommand{\dsk}[1]{\llbracket #1 \rrbracket_k}
+
+% Others
+\newcommand{\fv}[1]{\mathit{fv}(#1)}
+\newcommand{\im}[1]{\[ #1 \]}
+\newcommand{\lefttext}[1]{\begin{flushleft} \textbf{\underline{#1}} \end{flushleft} \vspace{-3mm}}
+\newcommand{\cites}[1]{\citeauthor{#1}'s [\citeyear{#1}]}
+\newcommand{\shade}[1]{\colorbox{lightgray!60}{$#1$}}

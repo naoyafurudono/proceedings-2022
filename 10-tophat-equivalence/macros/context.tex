@@ -1,0 +1,213 @@
+% !TEX root=../main.tex
+
+
+%% General %%
+
+\def\~{~}
+\def\-{\break}
+\def\starthiding#1\stophiding{}
+
+%% Structure %%
+
+\newmacro{starttext}{\begin{document}}
+\newmacro{stoptext}{\end{document}}
+
+\newcomment{startcomponent}
+\newcomment{stopcomponent}
+\newcomment{startproduct}
+\newcomment{stopproduct}
+\newcomment{startproject}
+\newcomment{stopproject}
+
+\newcomment{component}
+\newcomment{product}
+\newcomment{project}
+\newcomment{environment}
+
+\newmacro{doifthesiselse}[2]{#2}
+\newmacro{doifthesis}[1]{}
+\newmacro{doifpaper}[1]{#1}
+
+
+%% Sections %%
+
+\let\oldsection\section
+\let\oldsubsection\subsection
+
+\renewmacro{section}[2][1]
+  {\oldsection{#2}\label{#1}}
+\renewmacro{subsection}[2][1]
+  {\oldsubsection{#2}\label{#1}}
+\newmacro{subject}{\oldsection*}
+\newmacro{subsubject}{\oldsubsection*}
+
+
+%% Text & Itemgroups %%
+
+\newmacro{crlf}{\\}
+\newmacro{noindentation}{\relax}
+
+\newmacro{startitemize}[1][1]{%
+  \ifthenelse{\equal{#1}{n}}{%
+    \renewmacro{stopitemize}{%
+      \end{enumerate}
+    }
+    \begin{enumerate}
+  }{%
+  \ifthenelse{\equal{#1}{n,compact}}{%
+    \renewmacro{stopitemize}{%
+      \end{enumerate*}
+    }
+    \begin{enumerate*}
+  }{%
+  \ifthenelse{\equal{#1}{compact}}{%
+    \renewmacro{stopitemize}{%
+      \end{itemize*}
+    }
+    \begin{itemize*}
+  }{%
+    \renewmacro{stopitemize}{%
+      \end{itemize}
+    }
+    \begin{itemize}
+  }}}
+}
+\newmacro{stopitemize}{\relax}
+
+
+%% Tables %%
+
+\newboolean{need-column}
+\newboolean{need-row}
+
+\newmacro{NC}{%
+  \ifthenelse{\boolean{need-column}}{%
+    &
+  }{%
+    \ifthenelse{\boolean{need-row}}{%
+      \\
+      \setboolean{need-row}{false}
+    }{%
+    }
+    \setboolean{need-column}{true}
+  }
+}
+\newmacro{NR}{%
+  \setboolean{need-column}{false}
+  \setboolean{need-row}{true}
+}
+\newmacro{TR}{\NR}
+\newmacro{FL}{\toprule}
+\newmacro{ML}{\midrule}
+\renewmacro{LL}{\bottomrule}
+
+\newmacro{starttabulate}[1][1]{%
+  \setboolean{need-row}{false}
+  \setboolean{need-column}{false}
+  \begin{tabular}{#1}
+}
+\newmacro{stoptabulate}{%
+  \end{tabular}
+}
+
+\newmacro{definetabulate}[2][1,2]{}
+
+
+%% References & Citations %%
+
+\newmacro{see}[1][1]{\cref{#1}}
+\newmacro{seein}[2][2]{#1~\ref{#2}}
+
+\renewmacro{cite}[1][1]{\citep{#1}}
+\newmacro{inlinecite}[1][1]{\citet{#1}}
+
+
+%% Floats %%
+
+\newmacro{placefigure}[4][1={h},2]{%
+  % \newmacro{placement}{%
+  %    \ifthenelse{\equal{#1}{here}}{h}
+  %   {\ifthenelse{\equal{#1}{bottom}}{b}
+  %   {\ifthenelse{\equal{#1}{top}}{t}
+  %   {\ifthenelse{\equal{#1}{page}}{p}
+  %   {htb}}}}
+  % }
+  \begin{figure}[#1]
+    \centering
+    #4
+    \caption{#3}\label{#2}
+  \end{figure}
+}
+
+\newmacro{placetable}[4][1,2]{%
+  \begin{table}[htb]
+    \centering
+    #4
+    \caption{#3}\label{#2}
+  \end{table}
+}
+
+\newmacro{startpicture}[1][1]{\begin{tikzpicture}[#1]}
+\newmacro{stoppicture}{\end{tikzpicture}}
+
+\newmacro{lowerbox}[1]{\raisebox{-#1}}
+
+
+%% Blocks %%
+
+\newmacro{startdefinition}[2][1]{\begin{definition}[#2]\label{#1}}
+\newmacro{stopdefinition}{\end{definition}}
+
+\newmacro{startexample}[2][1]{\begin{example}[#2]\label{#1}}
+\newmacro{stopexample}{\end{example}}
+
+\newmacro{starttheorem}[2][1]{\begin{theorem}[#2]\label{#1}}
+\newmacro{stoptheorem}{\end{theorem}}
+
+\newmacro{startproposition}[2][1]{\begin{proposition}[#2]\label{#1}}
+\newmacro{stopproposition}{\end{proposition}}
+
+\newmacro{startlemma}[2][1]{\begin{lemma}[#2]\label{#1}}
+\newmacro{stoplemma}{\end{lemma}}
+
+\newmacro{startcorollary}[2][1]{\begin{corollary}[#2]\label{#1}}
+\newmacro{stopcorollary}{\end{corollary}}
+
+% \def\startproof#1\stopproof{}
+\newmacro{startproof}[1][1]{\begin{proof}\label{#1}}
+\newmacro{stopproof}{\end{proof}}
+
+\newmacro{startproofs}[1][1]{\begin{proof}\label{#1}}
+\newmacro{stopproofs}{\end{proof}}
+
+\newmacro{startquotation}{\begin{quoting}\noindent}
+\newmacro{stopquotation}{\end{quoting}}
+
+\newmacro{startTASK}{\begin{TASK}}
+\newmacro{stopTASK}{\end}
+
+
+%% Math %%
+
+% \newmacro{NL}{\\\strut\Quad}
+\newmacro{NL}{}
+
+\newmacro{startformula}{\begin{equation*}}
+\newmacro{stopformula}{\end{equation*}}
+
+\newmacro{startformulas}[1][1]{%
+  \renewmacro{stopformulas}{%
+      \end{aligned}
+    \end{equation*}
+  }
+  \setboolean{need-column}{false}
+  \setboolean{need-row}{false}
+  \begin{equation*}
+    \begin{aligned}
+}
+\newmacro{stopformulas}{\relax}
+
+\newmacro{startgrammar}{}
+\newmacro{stopgrammar}{}
+
+\newmacro{useproduction}{\usemacro}

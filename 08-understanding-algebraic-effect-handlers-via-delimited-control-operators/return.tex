@@ -1,0 +1,223 @@
+\newcommand{\Lambdahn}{
+\begin{figure}[t]
+
+\lefttext{Syntax}
+\begin{align*}
+V, W &::= x \mid \abs{x}{M} \mid \shade{\pair{l}{V}} && \text{Values} \\
+M, N &::= \ret{V} \mid \app{V}{V} \mid \letin{x}{M}{M} \mid \doop{V}
+     && \text{Computations} \\
+     & \mid \shade{\casep{V}{l}{x}{M}} \mid \shade{\casel{l}{M}{M}} \\
+     & \mid \handleone{M}{x}{k}{M} \\
+l &::= \shade{\optt} \mid \shade{\rettt} && \text{Labels}
+\end{align*}
+
+\medskip
+
+\lefttext{Reduction}
+\begin{align*}
+E[\app{(\abs{x}{M})}{V}]
+  &\reduce E[\subst{M}{x}{V}]
+  \hspace{3.58cm} \rulename{$\beta_v$} \\
+E[\letin{x}{\ret{V}}{M}]
+  &\reduce E[\subst{M}{x}{V}]
+  \hspace{3.58cm} \rulename{$\zeta_v$} \\
+E[\casep{\pair{l}{V}}{\lpr}{x}{M_r}]
+  &\reduce E[\substtwo{M_r}{\lpr}{l}{x}{V}]
+  \hspace{2.86cm} \rulename{$\iota_p$} \\
+E[\casel{\rettt}{M_r}{M_h}]
+  &\reduce E[M_r]
+  \hspace{4.23cm} \rulename{$\iota_{\mathit{ret}}$} \\
+E[\casel{\optt}{M_r}{M_h}]
+  &\reduce E[M_h]
+  \hspace{4.21cm} \rulename{$\iota_{\mathit{op}}$} \\
+E[\handleone{\ret{V}}{x}{k}{M_h}]
+  &\reduce E[\ret{V}]
+  \hspace{3.31cm} \rulename{$\beta_h$} \\
+E[\handleone{F[\doop{V}]}{x}{k}{M_h}]
+  &\reduce E[\substtwo{M}{x}{V}{k}{f}]
+  \hspace{2.93cm} \rulename{$\beta_{do}$} \\
+  & \hspace{5.2mm} \text{where } f = \abs{y}{\handleone{F[y]}{x}{k}{M_h}}
+\end{align*}
+
+\caption{\lambdahn: A Calculus of Effect Handlers without the Return Clause}
+\label{fig:lambdahn}
+\end{figure}
+}
+
+\section{Adding and Removing the Return Clause}
+\label{sec:return}
+
+The dollar construct $\dollarret{M}{x}{N}$ in \lambdasz is a
+generalization of the ``reset'' construct $\resetz{M}$, which is more
+commonly found in the continuations literature.
+The reset construct does not have an ending continuation; it simply
+evaluates the body $M$ in an empty context.
+As shown by Materzok and Biernacki~\cite{materzok-axiom}, the dollar and
+reset constructs can macro-express~\cite{felleisen-macro} each other.
+That is, there is a pair of local translations, called \textit{macro
+translations}, that add and remove the ending continuation while preserving
+the meaning of the program.
+
+It is easy to see that the return clause of an effect handler plays a
+similar role to the ending continuation of dollar.
+Thus, we can naturally consider a variant of effect handlers without the
+return clause.
+Such handlers are not uncommon in
+formalizations~\cite{schuster-capability,xie-evidently,zhang-bidirectional}
+as they simplify the reduction and typing rules.
+Now the reader might wonder: Does the existence of the return clause affects
+the expressiveness of an effect handler calculus?
+
+In this section, we define macro translations between handlers with and
+without the return clause.
+Among different ways of removing the return clause, we take a relatively 
+intuitive approach that relies on a labeling mechanism.
+In what follows, we review the macro translations between dollar and reset
+(Section~\ref{sec:return:dollar}), then adapt the translations to effect
+handlers (Section~\ref{sec:return:handler}), and lastly prove the
+correctness of the translations (Section~\ref{sec:return:correct}).
+
+
+\subsection{Translating Between Dollar and Reset0}
+\label{sec:return:dollar}
+
+Materzok and Biernacki~\cite{materzok-hierarchy} define the macro
+translations $\macro{\_}$ between dollar and \resetztt as
+follows\footnote{The macro translation is originally defined as:
+\im{
+\app{(\abs{k}{\resetz{\app{(\abs{x}{\shiftz{z}{\app{k}{x}}})}{\macro{M}}}})}
+    {\macro{N}}
+}
+We adapted the translation by sequencing the application, and by incorporating
+the fact that $N$ is always a $\lambda$-abstraction.}.
+
+\lefttext{From dollar to reset}
+\begin{align*}
+\macro{\dollarret{M}{x}{N}} &=
+\resetz{\letin{y}{\macro{M}}{\shiftz{z}{\app{(\abs{x}{\macro{N}})}{y}}}}
+\end{align*}
+
+\lefttext{From reset to dollar}
+\begin{align*}
+\macro{\resetz{M}} &= \dollarret{\macro{M}}{x}{\ret{x}}
+\end{align*}
+
+\noindent The translation from reset to dollar is straightforward: it
+simply adds a trivial ending continuation.
+The translation from dollar to reset is more involved: it wraps the
+computation $\macro{M}$ around a reset, and inserts a \shiftztt to
+remove the surrounding reset.
+The removal of reset is necessary for preservation of meaning (the return
+clause should not be evaluated under the original handler), and is realized
+by discarding the captured continuation $z$.
+
+Note that the translation of other constructs is defined homomorphically.
+For instance, we have $\macro{\abs{x}{M}} = \abs{x}{\macro{M}}$.
+
+
+\subsection{Translating Between Handlers with and without Return Clause}
+\label{sec:return:handler}
+
+\Lambdahn
+
+Guided by the translations between dollar and reset, we define macro
+translations between handlers with and without the return clause.
+We can easily imagine that adding the return clause is simple.
+To remove the return clause, we must somehow implement the removal of a
+handler.
+In a calculus of effect handlers, any non-local control is triggered by an
+operation call.
+This means we need to make an operation call when we wish to remove a
+handler.
+Unlike \shiftztt, however, an operation call does not have an interpretation
+on its own.
+This means we need to implement the removing behavior in the surrounding
+handler, while distinguishing the ``return operation'' from regular
+operations.
+
+In Figure~\ref{fig:lambdahn}, we define a calculus of effect handlers
+without the return clause, which we call \lambdahn.
+The calculus has labels $l$ and pairs $\pair{l}{V}$, allowing us to represent
+the return and regular operations as $\doopl{\rettt}{V}$ and $\doopl{\optt}{V}$,
+respectively.
+The calculus also has pattern matching constructs, with which we can interpret
+the two kinds of operations differently in a handler.
+Note that these facilities are introduced only for the translation purpose.
+That is, we assume that the user can only program with unlabeled operations;
+they do not have access to the shaded constructs in Figure~\ref{fig:lambdahn}.
+
+We now define the macro translations between \lambdah and \lambdahn.
+
+\lefttext{From \lambdah to \lambdahn}
+\begin{align*}
+\macro{\doop{V}} &= \doopl{\optt}{\macro{V}} \\
+\macro{\handle{M}{x}{M_r}{x}{k}{M_h}}
+  &= \handlett \ (\letnoin{y}{\macro{M}} \\
+  & \hspace{1.88cm} \intt \ \doopl{\rettt}{y}) \\
+  & \hspace{4.8mm} \withtt \ \{ p, k \rightarrow \caseptt \ p \ \oftt \ \{ \pair{l}{x} \rightarrow \\
+  & \hspace{5.2mm} \{ \casett_l \ l \ \oftt \\
+  & \hspace{5.6mm} \{ \rettt \rightarrow \macro{M_r}; \, \optt \rightarrow \macro{M_h} \} \} \} \}
+\end{align*}
+
+\lefttext{From user fragment of \lambdahn to \lambdah}
+\begin{align*}
+\macro{\doop{V}} &= \doop{\macro{V}} \\
+\macro{\handleone{M}{x}{k}{M_h}}
+  &= \handlett \ \macro{M} \\
+  &\hspace{4.8mm} \withtt \ \handler{x}{\ret{x}}{x}{k}{\macro{M_h}}
+\end{align*}
+
+\noindent The first translation\footnote{
+If we wish to apply these translations to a typed language, we would need to 
+slightly modify the definition.
+The reason is that, the translation of regular handlers yields a single 
+pattern variable $x$ representing the arguments of the \rettt and \optt 
+operations, which have different types in general.
+}\footnote{An anonymous reviewer suggests a different translation that does 
+not use labels:
+
+\vspace{-2mm}
+
+\begin{align*}
+&\hspace{4.3mm} \macro{\handle{M}{x}{M_r}{x}{k}{M_h}} \\
+&= (\handlett \ (\letin{y}{\macro{M}}{\ret{\abs{\_}{\app{(\abs{x}{\macro{M_r}})}{y}}}}) \\
+&\hspace{5.7mm}  \withtt \ \{ x, \kpr. \, \ret{\abs{\_}{\subst{\macro{M_h}}{k}{\abs{z}{\apptwo{\kpr}{z}{0}}}}} \}) \\
+&\hspace{4.3mm} 0
+\end{align*}
+
+\noindent where $\app{M}{V}$ is a shorthand for $\letin{x}{M}{\app{x}{V}}$
+and $0$ can be replaced by any constant.
+The translation implements the return clause by creating thunks (to exit from 
+a handler) and passing around a dummy argument (to trigger computation).
+This eliminates the need for labels, but in our view, it also makes the 
+translation slightly harder to understand.
+} attaches a label $\optt$ to regular operations
+and simulates the return clause by performing a $\rettt$ operation, which
+removes the surrounding handler by discarding the continuation $k$.
+The second translation is fairly easy.
+
+
+\subsection{Correctness}
+\label{sec:return:correct}
+
+The macro translations defined above preserve the meaning of programs.
+We state this property as the following theorem.
+
+\begin{theorem}[Correctness of Macro Translations]
+\label{thm:correctmacro}
+Let $=$ be the least congruence relation that includes the reduction
+$\reduce$ in \lambdah and \lambdahn.
+
+\begin{enumerate}
+\item If $M = N$ in \lambdah, then $\macro{M} = \macro{N}$ in \lambdahn.
+
+\item If $M = N$ in the user fragment of \lambdahn (i.e., the fragment
+  consisting of non-shaded constructs), then $\macro{M} = \macro{N}$ in
+  \lambdah.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+By cases on the reduction relation $M \reduce N$.
+%We provide the proof of interesting cases in Appendix~\ref{app:retprf}.
+\end{proof}

@@ -1,0 +1,68 @@
+\section{Additional examples}
+
+This section will present two larger example-programs in \TOPHAT.
+Example~\ref{ex:stopwatch} models a stopwatch, which shows how shared editors can be used to create timed tasks.
+It also shows an example of a higher-order task, and it demonstrates the use of the transform, step and choice combinators.
+Example~\ref{ex:bookflight} models a simple multi-user flight booking system, which shows how multiple users can work in parallel on the same shared data source.
+It demonstrates reference creation, assignment, and the step and parallel combinators.
+
+\startexample[ex:stopwatch]{Stopwatch}
+  Shared editors can also be used to represent sensors or clocks.
+  For example, we can represent the current time as a shared editor \TS{watch time}.
+  While sensors and clocks are not explicitly modelled in \TOPHAT, we can assume that they exists as external users which periodically send update events to the system.
+  By using shared editors as clocks, we could write a task-program that reacts to a timeout:
+  \begin{TASK}[numbers=right,moreemph={age,now}]
+    let wait : Int -> Task $\tau$ -> Task $\tau$ = \m. \t.
+      watch time >>= start.
+      watch time >>= now.
+        if now >= start + m then t else fail  in
+    let timer : Task String = ((\s. 1000 * s) <*> enter Int) >>= \m.
+      (enter Unit >>= \x. view "Stopped") <|> wait m (view "Done")
+  \end{TASK}
+  \begin{TASK}[numbers=right]
+    let wait : Int -> Task $\tau$ -> Task $\tau$ = \m. \t.
+      watch time >>= \start : Int.
+      watch time >>= \now : Int.
+        if now >= start + m then t else fail  in
+    let timer : Task String = ((\s. 1000 * s) <*> enter Int) >>= \m.
+      (enter Unit >>= \x. view "Stopped") <|> wait m (view "Done")
+  \end{TASK}
+  The \var{wait} function (lines 1-4) is an example of a higher order task.
+  It takes an integer $m$ and a task $t$ as arguments.
+  The first step is immediately taken, so that the variable $\mathit{start}$ holds the initial time (line 2).
+  The next step will remain guarded until $m$ milliseconds have passed, after which the task $t$ is returned (line 3-4).
+
+  We use this function to define a stopwatch in \TOPHAT.
+  Suppose that the user should enter the number of seconds $s$ for which the stopwatch should run.
+  Because we defined \var{wait} on milliseconds, we use transform ($\Trans$) to convert seconds to milliseconds (line 5).
+  After the user enters a value, the step is taken, which starts the task \TS{wait m (lift "Done")} (line 6).
+  This task displays \TS{"Done"} on the screen after $m$ milliseconds, but so long as this task is still running, it has no value.
+  We give the user a choice ($\Choose$) to interrupt the stopwatch by sending an input event to the task on the left-hand side of the choice combinator (line 6).
+  If done so before $m$ milliseconds have passed, the left-hand side of the choice combinator will have a value before the right-hand side, and it displays \TS{"Stopped"} on the screen.
+\stopexample
+
+\startexample[ex:bookflight]{Flight booking}
+  We model a simple multi-user system where users can book a flight:
+  \begin{TASK}[numbers=right,moreemph={freeSeats}]
+     ref 42 >>= \freeSeats.
+     let validPassenger = \p. not (fst p == "") /\ snd p >= 18 in
+     let chooseSeats = \p. (enter Int <&> watch freeSeats) >>= \{s, fs}.
+       if fs >= s then freeSeats := fs - s; view {p, s} else fail in
+     let bookFlight = enter (String * Int) >>= \p.
+       if validPassenger p then chooseSeats p else fail in
+     bookFlight <&> bookFlight <&> bookFlight
+  \end{TASK}
+
+  When booking a flight, passengers should first enter their name and age into the system (line 5).
+  Only when they enter a valid name and are at least 18 years old (line 2), are they allowed to proceed.
+  Next, they have to choose how many tickets they want to buy.
+  We create a shared reference $\mathit{freeSeats}$ to keep track of how many seats are still available, and set its initial value to 42 (line 1).
+  A user is only allowed to buy a certain amount of tickets if it does not exceed the number of tickets available.
+  We can get the current value of $\mathit{freeSeats}$ by using a shared editor.
+  Because we want to get this value at the same moment as the user enters the amount of tickets he wants to buy, we set these two editors in parallel (line 3).
+  If all went well, the system updates the value of $\mathit{freeSeats}$, and displays the passenger and the amount of tickets bought (line 4).
+
+  The parallel combinator ($\Pair$) allows multiple \var{bookFlight} instances to run in parallel (line 7).
+  This way, multiple users can book tickets at the same time.
+  Their input events can interleave, and the order of execution is determined by the order of input events.
+\stopexample

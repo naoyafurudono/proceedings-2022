@@ -1,0 +1,86 @@
+\newcommand{\Lambdah}{
+\begin{figure}[t]
+
+\lefttext{Syntax}
+\begin{align*}
+V, W &::= x \mid \abs{x}{M} && \text{Values} \\
+M, N &::= \ret{V} \mid \app{V}{V} \mid \letin{x}{M}{M} && \text{Computations} \\
+     &\mid \doop{V} \mid \handle{M}{x}{M}{x}{k}{M}
+\end{align*}
+
+\medskip
+
+\lefttext{Evaluation Contexts}
+\begin{align*}
+E &::= \hole \mid \letin{x}{E}{M} \mid \handle{E}{x}{M}{x}{k}{M} 
+  && \text{General Contexts} \\
+F &::= \hole \mid \letin{x}{F}{M} 
+  && \text{Pure Contexts}
+\end{align*}
+
+\medskip
+
+\lefttext{Reduction}
+\begin{align*}
+E[\app{(\abs{x}{M})}{V}]
+  &\reduce E[\subst{M}{x}{V}]
+  \hspace{3cm} \rulename{$\beta_v$} \\
+E[\letin{x}{\ret{V}}{M}]
+  &\reduce E[\subst{M}{x}{V}]
+  \hspace{3cm} \rulename{$\zeta_v$} \\
+E[\handle{\ret{V}}{x}{M_r}{x}{k}{M_h}]
+  &\reduce E[\subst{M_r}{x}{V}]
+  \hspace{2.88cm} \rulename{$\beta_h$} \\
+E[\handle{F[\doop{V}]}{x}{M_r}{x}{k}{M_h}]
+  &\reduce E[\substtwo{M_h}{x}{V}{k}{f}]
+  \hspace{2.18cm} \rulename{$\beta_{\mathit{do}}$} \\
+  & \hspace{5.5mm}
+  \text{where } f = \abs{y}{\handlett \ F[\ret{y}]} \\
+  & \hspace{2.64cm} \withtt \ \handler{x}{M_r}{x}{k}{M_h}
+\end{align*}
+
+\caption{Syntax and Reduction Rules of \lambdah}
+\label{fig:lambdah}
+\end{figure}
+}
+
+\section{\lambdah: A Calculus of Effect Handlers}
+\label{sec:lambdah}
+
+As a calculus of effect handlers, we consider a restricted variant of
+Hillerstr\"om et al.'s calculus of deep handlers~\cite{hillerstrom-cps},
+which we call \lambdah.
+In Figure~\ref{fig:lambdah}, we present the syntax and reduction rules
+of \lambdah.
+The calculus differs from Hillerstr\"om et al.'s in that it features
+unlabeled operations.
+This means handlers in \lambdah can only handle a single operation.
+The restriction helps us concentrate on the connection to the \lambdasz
+calculus.
+
+Among the effect constructs, $\doop{V}$ performs an operation with
+argument $V$.
+The other construct $\handle{M}{x}{M_r}{x}{k}{M_h}$ computes the main
+computation $M$ in a delimited context, and handles the result of $M$
+using the return clause $M_r$ and the operation clause $M_h$.
+
+There are again two reduction rules for the effect constructs.
+If the main computation of a handler evaluates to a value $V$, the whole
+expression evaluates to the return clause $N$ with $V$ bound to $x$
+(rule \rulename{$\beta_h$}).
+If the main computation evaluates to $F[\doop{V}]$, where $F$ is a pure
+evaluation context that has no handler surrounding a hole, the whole expression
+evaluates to the operation clause $M_h$, with $x$ being $V$ and $k$ being
+the captured continuation (often called ``resumption'' in the effect handlers
+literature) $\abs{y}{\handle{F[\ret{y}]}{x}{M_r}{x}{k}{M_h}}$
+(rule \rulename{$\beta_{do}$}).
+Notice that the continuation includes the handler that was originally
+surrounding the operation.
+This design is shared with \shiftztt, and characterizes handlers in
+\lambdah as deep ones~\cite{kammar-handler}.
+Notice next that the operation clause is evaluated without being surrounded
+by the original handler.
+This is another similarity to \shiftztt, and allows handlers to capture
+a metacontext.
+
+\Lambdah
