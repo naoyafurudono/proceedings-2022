@@ -1,0 +1,60 @@
+% Strachey keywords
+
+
+
+%format handler   = "{\HSKeyword{handler}}"
+%format effect    = "{\HSKeyword{effect}}"
+%format end       = "{\HSKeyword{end}}"
+%format signature = "{\HSKeyword{signature}}"
+%format row       = "{\HSKeyword{row}}"
+%format sort      = "{\HSKeyword{sort}}"
+%format cons      = "{\HSKeyword{cons}}"
+%format alg       = "{\HSKeyword{alg}}"
+%format record    = "{\HSKeyword{record}}"
+%format inj       = "{\HSKeyword{inj}}"
+%format proj      = "{\HSKeyword{proj}}"
+%format out       = "{\HSKeyword{out}}"
+%format map       = "{\HSKeyword{map}}"
+%format fun       = "{\HSKeyword{fun}}"
+%format return    = "{\HSKeyword{return}}"
+%format match     = "{\HSKeyword{match}}"
+%format with      = "{\HSKeyword{with}}"
+
+%format mfail     = "{\HSVar{fail}}" 
+
+% Infix
+
+%format <$> = "\HSSpecial{\ensuremath{<\!\!\$\!\!>}}"
+%format <*> = "\HSSpecial{\ensuremath{<\!\!*\!\!>}}"
+
+%format !!!   = "!\ "
+%format |||    = "\HSSym{|}" 
+
+% Strachey operations
+
+\definecolor{opcolor}{RGB}{100,0,0} 
+\newcommand{\STOperation}[1]{\mathcolor{opcolor}{\text{#1}}}
+
+%format lam   = "{\STOperation{lam}}"
+%format app   = "{\STOperation{app}}"
+%format var   = "{\STOperation{var}}"
+%format thunk = "{\STOperation{thunk}}"
+%format get   = "{\STOperation{get}}"
+%format put   = "{\STOperation{put}}"
+%format fail  = "{\STOperation{fail}}"
+%format catch = "{\STOperation{catch}}"
+
+% Other
+
+%format |>        = "{\ \triangleright\ }"
+%format star      = "{\star}"
+%format lightning = "{\lightning}"
+
+\definecolor{highlight}{RGB}{220,220,220} 
+%format texc      = "{\colorbox{highlight}{\ensuremath{t!}}}"
+%format mthunk      = "{\colorbox{highlight}{\ensuremath{\mathit{Thunk}\ t}}}"
+
+%format m1exc = "\ensuremath{m1!}"
+
+% invisible char, for alignment
+%format ◂ = " "
