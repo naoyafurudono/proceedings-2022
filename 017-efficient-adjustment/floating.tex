@@ -206,9 +206,9 @@ clarifies the constraint on open floating.%mdk
 
 \section{1.\hspace*{0.5em}Introduction}\mdlabel{sec-intro}{1}%mdk%mdk
 
-\noindent Algebraic effect handlers~[\mdcite{plotkin:handlers}{14}] are language feature for user-defined effects.
+\noindent Algebraic effect handlers~[\mdcite{plotkin:handlers}{14}] are a language feature for user-defined effects.
 For instance, using effect handlers, we can support exception, asynchronous programming[\mdcite{leijen:async}{8}],
-nondeterminism, and so on not as builtin features but as libraries.
+nondeterminism, and so on, not as builtin features but as libraries.
 While effect handlers are convenient, they incur more runtime overhead compared to native effects.
 In order to fill in the gap of the performance, suitable semantics have been explored~[\mdcite{dolan2015effective}{2}, \mdcite{pretnar:efficientcomp}{15}, \mdcite{xie2020effect}{19}, \mdcite{xie:gep}{20}].%mdk
 
@@ -268,9 +268,11 @@ To give the reader a rough idea of the algorithm, we present programs before and
 \\
 \end{tabular}\end{mdtabular}
 
-\noindent Right one is faster than left one, due to the number of adjustments operations $\mathpre{\mathkw{open}}$ and $\mathpre{\mathkw{restrict}}$.
-Both $\mathpre{\mathkw{open}}$ and $\mathpre{\mathkw{restrict}}$ perform the same adjustment thus the transformation decreases the number of adjustments.
-The restrict construct can be applied to general expressions, not just functions.
+\noindent The one on the right is faster than the one on the left, because the former has less adjustment operations $\mathpre{\mathkw{open}}$ and $\mathpre{\mathkw{restrict}}$.
+Both of them perform the same adjustment.
+ 
+The difference is that $\mathpre{\mathkw{open}}$ is used solely to functions, while $\mathpre{\mathkw{restrict}}$ can be applied to general expressions.
+
 This is essential to share a single
 adjustment over multiple function applications.%mdk
 
@@ -285,7 +287,7 @@ We elaborate on effect typing in the extended system, showing%mdk
 
 \begin{itemize}[noitemsep,topsep=\mdcompacttopsep]%mdk
 
-\item how the type system checks the use of effect handlers (Section~\mdref{sec-static}{3.3})%mdk
+\item the way the type system checks the use of effect handlers (Section~\mdref{sec-static}{3.3})%mdk
 
 \item an advantage of using rows for effect types rather than sets, which are popular in effect handler calculi~[\mdcite{brachthauser2020effekt}{1}, \mdcite{schrijvers:effsub}{16}] (Section~\mdref{sec-prefix}{3.4})%mdk
 
@@ -1985,7 +1987,7 @@ The benchmark shows the effectiveness of open floating and points out room to im
 
 \noindent We acknowledge the reviewers' efforts put into evaluation of our paper.
 We also appreciate the FLOPS 2022 reviewers' feedback on an earlier version of the paper.
-We also thank laboratory members.%mdk
+Lastly, we thank members of Masuhara laboratory.%mdk
 %mdk-begin-texraw
 This work was supported in part by JSPS KAKENHI under Grant No.~JP19K24339. 
 
